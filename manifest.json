@@ -2,9 +2,9 @@
     "name": "Form Filler",
     "version": "0.0.1",
     "manifest_version": 2,
-    "applications": {
-        "gecko": {
-            "id": "universitylille.fil.formfiller"
-        }
+    "browser_action": {
+        "default_title": "Form Filler",
+        "default_popup": "assets/pages/popup.html",
+        "default_icon": "assets/icons/icon38.png"
     }
 }
