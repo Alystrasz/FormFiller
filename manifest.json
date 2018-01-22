@@ -1,10 +1,40 @@
 {
-    "name": "Form Filler",
-    "version": "0.0.1",
-    "manifest_version": 2,
-    "browser_action": {
-        "default_title": "Form Filler",
-        "default_popup": "assets/pages/popup.html",
-        "default_icon": "assets/icons/icon38.png"
+  "name": "Form Filler",
+  "description": "Fill forms with given template",
+  "version": "0.0.1",
+  "manifest_version": 2,
+  "browser_action": {
+    "default_title": "Form Filler",
+    "default_popup": "src/ui/popup/popup.html",
+    "default_icon": "src/ui/icons/icon38.png"
+  },
+  "permissions": [
+    "activeTab",
+    "storage"
+  ],
+  "background": {
+    "persistent": false,
+    "scripts": [
+      "src/utils/browser/utils.js",
+      "src/utils/log/fflog.js",
+      "src/ext/js/background.js"
+    ]
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "<all_urls>"
+      ],
+      "css": [
+        "src/ext/css/formfiller.css"
+      ],
+      "js": [
+        "src/utils/browser/utils.js",
+        "src/utils/dom/utils.js",
+        "src/utils/log/fflog.js",
+        "src/ext/js/content.js"
+      ],
+      "run_at": "document_end"
     }
+  ]
 }
