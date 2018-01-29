@@ -61,6 +61,11 @@ var DOM_UTILS = (function () {
                 }
             }
 
+            //Name ?
+            if(!fieldName ){
+                fieldName = input.name;
+            }
+
             fieldName = fieldName.trim();
 
             //Final input structure
