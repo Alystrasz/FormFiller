@@ -109,7 +109,7 @@ var DOM_UTILS = (function () {
                 xpath: cField.xpath
             }
         }
-        return (JSON.stringify(fModel, null, 2));
+        return fModel;
     }
 
     /**

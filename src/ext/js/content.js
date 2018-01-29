@@ -27,7 +27,30 @@ function _get_forms() {
                 xpath: DOM_UTILS.xpath(forms[i])
             };
             //DEBUG : print associated form model
-            console.log(DOM_UTILS.fields_model(formMetas, fFields));
+            var fModel = DOM_UTILS.fields_model(formMetas, fFields);
+            console.log('----------------------------------------');
+            console.log(' FORM APPLICATION MODEL');
+            console.log('----------------------------------------');
+            console.log(JSON.stringify(fModel, null, 2));
+
+            //TODO : tmp, implement this in a safe way
+            var formAssociatedUserModel = {
+                associatedForm : fModel.uuid,
+                data:{}
+                },
+                modelFields = fModel.fields;
+            for(var k in modelFields){
+                formAssociatedUserModel.data[k] = '';
+            }
+
+            console.log('----------------------------------------');
+            console.log(' FORM USER MODEL');
+            console.log('----------------------------------------');
+            console.log(formAssociatedUserModel);
+
+            console.log('');
+            console.log('');
+
             //Apply form class mark
             forms[i].classList.add('formfiller_mark');
             //Add fields
