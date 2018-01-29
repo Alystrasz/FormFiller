@@ -1,20 +1,20 @@
 //Debug
-FFLOG.info('Content script loaded');
+FormFillerLog.info('Content script loaded');
 
-//Listen for messages
-//origin : background script
-BROWSER_UTILS.MESSAGE.listen('BACKGROUND_SCRIPT', function (content) {
-    FFLOG.log('*Message test* Received from background script >', content);
+//Init message handler
+var MESSAGE_HANDLER = BROWSER_UTILS.MESSAGE.register('CONTENT_SCRIPT');
+
+//From : BACKGROUND
+MESSAGE_HANDLER.from('BACKGROUND', function (message) {
+
 });
 
-//Listen for messages
-//origin : popup
-BROWSER_UTILS.MESSAGE.listen('POPUP', function (content) {
-    FFLOG.log('*Message* Received from popup script > ', content);
-
+//From : POPUP
+MESSAGE_HANDLER.from('POPUP', function (message) {
+    
     //Test : action get_forms
     //TODO : snippet, implement this in a better way
-    if (content === 'get_forms') {
+    if (message === 'get_forms') {
         //Get forms
         var forms = document.querySelectorAll('form'),
             fmsInputs = [];
@@ -37,9 +37,8 @@ BROWSER_UTILS.MESSAGE.listen('POPUP', function (content) {
             forms[i].classList.add('formfiller_mark');
         }
         //Display in tab console
-        FFLOG.log('Found forms >', fmsInputs);
+        FormFillerLog.log('Found forms >', fmsInputs);
     }
 });
 
-//Test message to background (no tab specified)
-//BROWSER_UTILS.MESSAGE.send('CONTENT_SCRIPT', 'test message');
+

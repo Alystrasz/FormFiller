@@ -13,10 +13,9 @@
     "storage"
   ],
   "background": {
-    "persistent": false,
     "scripts": [
       "src/utils/browser/utils.js",
-      "src/utils/log/fflog.js",
+      "src/utils/log/log.js",
       "src/ext/js/background.js"
     ]
   },
@@ -31,7 +30,7 @@
       "js": [
         "src/utils/browser/utils.js",
         "src/utils/dom/utils.js",
-        "src/utils/log/fflog.js",
+        "src/utils/log/log.js",
         "src/ext/js/content.js"
       ],
       "run_at": "document_end"

@@ -1,20 +1,49 @@
 /**
  * Browser utils wrapper
- * @type {{TABS, MESSAGE}}
+ * @type {{TABS, MESSAGE, BADGE}}
  */
 var BROWSER_UTILS = (function (namespace) {
 
     /**
-     * Get active tab
+     * Utils vars
+     */
+    var BU = {
+        //Contexts vars
+        CONTEXTS: {
+            activeTab: null,
+            activeWindow: null
+        },
+        //Message handlers vars
+        MESSAGES: {
+            registeredMessageHandlers: []
+        }
+    };
+
+
+    /**
+     * Active tab getter
      * @param clbk
      * @private
      */
-    function _tabs_active(clbk) {
-        namespace.tabs.query({
-            active: true,
-            currentWindow: true
-        }, function (tabs) {
-            clbk(tabs[0]);
+    function _tab_active(clbk) {
+        //Get active window
+        _window_active(function (activeWindow) {
+            //Get selected tab
+            namespace.tabs.getSelected(activeWindow, function (tab) {
+                clbk(tab.id);
+            });
+        })
+    }
+
+    /**
+     * Active window getter
+     * @param clbk
+     * @private
+     */
+    function _window_active(clbk) {
+        //Get current active contexts [WINDOW]
+        namespace.windows.getCurrent(function (w) {
+            clbk(w.id);
         });
     }
 
@@ -22,11 +51,12 @@ var BROWSER_UTILS = (function (namespace) {
      * Listen for a message
      * @param from
      * @param clbk
+     * @param receiver
      * @private
      */
-    function _message_listen(from, clbk) {
+    function _message_listen(from, clbk, receiver) {
         namespace.runtime.onMessage.addListener(function (request, sender) {
-            if (request.from === from) {
+            if (request.from === from && request.receiver === receiver) {
                 clbk(request.content, sender);
             }
         });
@@ -35,17 +65,59 @@ var BROWSER_UTILS = (function (namespace) {
     /**
      * Send a message
      * @param origin
+     * @param destination
      * @param content
-     * @param tabId
+     * @param tabContext
      * @private
      */
-    function _message_send(origin, content, tabId) {
+    function _message_send(origin, destination, content, tabContext) {
+        //Build up message content
         var messageContent = {
             from: origin,
+            receiver: destination,
             content: content
         };
-        if(tabId === undefined) namespace.runtime.sendMessage(messageContent);
-        else namespace.tabs.sendMessage(tabId, messageContent);
+        //Send message
+        if (!tabContext) namespace.runtime.sendMessage(messageContent);
+        else {
+            //Get active tab
+            _tab_active(function (activeTab) {
+                //Given destination is a tab context (current tab)
+                namespace.tabs.sendMessage(activeTab, messageContent);
+            });
+        }
+    }
+
+
+    /**
+     * Register a message handler (to send & receive)
+     * @param origin
+     * @returns {{send, listen}}
+     * @private
+     */
+    function _message_register(origin) {
+
+        //Build handler
+        var mHandler = {
+            send: function (to, content, tabContext) {
+                _message_send(origin, to, content, tabContext);
+                return this;
+            },
+            from: function (from, onMessage) {
+                _message_listen(from, onMessage, origin);
+                return this;
+            }
+        };
+
+        //Register it
+        BU.MESSAGES.registeredMessageHandlers.push({
+            origin: origin,
+            handler: mHandler
+        });
+
+        //Return handler
+        return mHandler;
+
     }
 
     /**
@@ -62,11 +134,10 @@ var BROWSER_UTILS = (function (namespace) {
      */
     return {
         TABS: {
-            active: _tabs_active
+            active: _tab_active
         },
         MESSAGE: {
-            listen: _message_listen,
-            send: _message_send
+            register: _message_register
         },
         BADGE: {
             text: _badge_text

@@ -1,20 +1,17 @@
-//BACKGROUND SCRIPT SHOULD BE USED FOR 'HEAVY' TASKS
+//*****************************************************//
+// BACKGROUND SCRIPT SHOULD BE USED FOR 'HEAVY' TASKS  //
+//*****************************************************//
 
 
-//Listen from content script
-BROWSER_UTILS.MESSAGE.listen('CONTENT_SCRIPT', function(content, sender){
-    //Debug
-    FFLOG.log('*Message* Received from content script >', content);
-    //NOTE : can get tab id origin on sender.tab.id
+//Init message handler
+var MESSAGE_HANDLER = BROWSER_UTILS.MESSAGE.register('BACKGROUND');
+
+//From : CONTENT_SCRIPT
+MESSAGE_HANDLER.from('CONTENT_SCRIPT', function (message) {
+
 });
 
-//Listen from popup
-BROWSER_UTILS.MESSAGE.listen('POPUP', function(content){
-    //Debug
-    FFLOG.log('*Message* Received from popup  >', content);
-    //Send back
-    //NOTE : if no tab id is specified, message is received by extension scripts
-    BROWSER_UTILS.MESSAGE.send('BACKGROUND_SCRIPT', 'PONG');
+//From : POPUP
+MESSAGE_HANDLER.from('POPUP', function (message) {
+
 });
-
-

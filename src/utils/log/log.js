@@ -1,7 +1,7 @@
 /**
  * Log wrapper
  */
-var FFLOG = (function () {
+var FormFillerLog = (function () {
 
 
     var ffDomain = console,
