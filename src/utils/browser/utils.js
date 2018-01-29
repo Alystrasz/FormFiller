@@ -20,31 +20,27 @@ var BROWSER_UTILS = (function (namespace) {
     };
 
 
+
     /**
      * Active tab getter
-     * @param clbk
      * @private
      */
-    function _tab_active(clbk) {
-        //Get active window
-        _window_active(function (activeWindow) {
-            //Get selected tab
-            namespace.tabs.getSelected(activeWindow, function (tab) {
-                clbk(tab.id);
-            });
-        })
+    function _tab_active() {
+        //Get current tab
+        return namespace.tabs.query({
+            active:true,
+            currentWindow:true
+        });
     }
 
     /**
      * Active window getter
-     * @param clbk
+     * @returns {*|{minArgs, maxArgs}}
      * @private
      */
-    function _window_active(clbk) {
-        //Get current active contexts [WINDOW]
-        namespace.windows.getCurrent(function (w) {
-            clbk(w.id);
-        });
+    function _window_active() {
+        //Get current window
+        return namespace.windows.getCurrent();
     }
 
     /**
@@ -77,13 +73,14 @@ var BROWSER_UTILS = (function (namespace) {
             receiver: destination,
             content: content
         };
+
         //Send message
         if (!tabContext) namespace.runtime.sendMessage(messageContent);
         else {
             //Get active tab
-            _tab_active(function (activeTab) {
+            _tab_active().then(function (tabs) {
                 //Given destination is a tab context (current tab)
-                namespace.tabs.sendMessage(activeTab, messageContent);
+                namespace.tabs.sendMessage(tabs[0].id, messageContent);
             });
         }
     }
@@ -145,6 +142,4 @@ var BROWSER_UTILS = (function (namespace) {
     }
 
 
-}(window.msBrowser ||
-    window.browser ||
-    window.chrome));
+}(browser));

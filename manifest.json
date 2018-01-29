@@ -14,6 +14,7 @@
   ],
   "background": {
     "scripts": [
+      "src/polyfills/browser-polyfill.min.js",
       "src/utils/browser/utils.js",
       "src/utils/log/log.js",
       "src/ext/js/background.js"
@@ -28,6 +29,7 @@
         "src/ext/css/formfiller.css"
       ],
       "js": [
+        "src/polyfills/browser-polyfill.min.js",
         "src/utils/browser/utils.js",
         "src/utils/dom/utils.js",
         "src/utils/log/log.js",
