@@ -7,17 +7,15 @@ This project aims to fill forms while being offline.
 ### On Chrome
 
 Visit `chrome://extensions`, activate the Developer mode (at the top of the page),
-click the first button, then select the project folder (that doesn't need to be
-packaged for Chrome), and that's it.
+click the first button, then select the project folder, and that's it.
 
 *Note:* Do not worry if you have warnings while installing, it's because of
 compatibility issues between browsers.
 
 ### On Firefox
 
-You need to package the extension first ; to do so, navigate to the project folder
-and package it with `zip FormFiller.xpi .`. Then drop the .xpi file into a
-Firefox tab, validate the pop-up message, and you're done.
+Visit `about:debugging`, click the `Load Temporary Add-on` button, and select the `manifest.json` 
+file, in the project folder. You're good to go!
 
 *Note:* If you have errors, visit `about:config` and invert the value of the key
 `xpinstall.signatures.required`.
