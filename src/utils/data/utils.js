@@ -1,14 +1,25 @@
 var STORAGE_UTILS = (function () {
 
     /**
+      * Checks if the localStorage API is supported by the browser
+      * @returns {boolean} whether the API is supported or not
+      * @private
+      **/
+    function _localStorage_is_supported() {
+        return (typeof(Storage) !== "undefined");
+    }
+
+    /**
       * Stores json object into user browser
       * @param {String} key name of the data
       * @param {JSON} json object to store
       * @returns {boolean} whether the storage succeeded or not
       * @private
       **/
-    function store_json(key, json) {
-
+    function _store_json(key, json) {
+        if(!_localStorage_is_supported)
+            return;
+        localStorage.setItem(key, JSON.stringify(json));
     }
 
     /**
@@ -18,7 +29,9 @@ var STORAGE_UTILS = (function () {
       * @private
       **/
     function _get_json(key) {
-
+        if(!_localStorage_is_supported)
+            return;
+        return localStorage.getItem(key);
     }
 
     /**
@@ -39,6 +52,16 @@ var STORAGE_UTILS = (function () {
       **/
     function _yaml_to_json(yaml) {
 
+    }
+
+    return {
+        store_json: function(key, json){
+            _store_json(key, json);
+        },
+
+        get_json: function(key){
+            return _get_json(key);
+        }
     }
 
 
