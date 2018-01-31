@@ -1,0 +1,1 @@
+var result = jsyaml.load('greeting: hello\nname: world');
