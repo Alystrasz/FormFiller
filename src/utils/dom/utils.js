@@ -58,7 +58,9 @@ var DOM_UTILS = (function () {
      */
     function _input_name_deduce(input, inputIndex, names, inputWNameIndex) {
         //Init result
-        var inputName = '';
+        var inputName = '',
+            //Input ID
+            inputID = _attr(input, 'id');
         //Place holder ?
         if (!(inputName = _attr(input, 'placeholder'))) {
             //Aria label ?
@@ -137,8 +139,7 @@ var DOM_UTILS = (function () {
 
 
                         //Init label search
-                        var inputLabel,
-                            inputID = _attr(input, 'id');
+                        var inputLabel;
                         //Seek for label, starting from input parent
                         if (!(inputLabel = labelSeek(inputParent, inputID))) {
                             //Trying without id
