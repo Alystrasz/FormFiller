@@ -141,14 +141,15 @@ var DOM_UTILS = (function () {
                         //Init label search
                         var inputLabel;
                         //Seek for label, starting from input parent
-                        if (!(inputLabel = labelSeek(inputParent, inputID))) {
-                            //Trying without id
-                            inputLabel = labelSeek(inputParent);
-                        }
-                        //If label has been found
-                        if (inputLabel) {
+                        if (inputLabel = labelSeek(inputParent, inputID)) {
                             //Label text content
                             inputName = inputLabel.firstChild.textContent;
+                        } else {
+                            //Check previous sibling element
+                            var previousSiblingElem = input.previousElementSibling;
+                            if (previousSiblingElem.tagName === 'LABEL') {
+                                inputName = previousSiblingElem.firstChild.textContent;
+                            }
                         }
                     }
 
