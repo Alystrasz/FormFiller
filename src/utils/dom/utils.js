@@ -52,10 +52,11 @@ var DOM_UTILS = (function () {
      * @param input
      * @param inputIndex (Used if no criteria has been found to deduce the name)
      * @param names Already registered names
+     * @param inputWNameIndex Index of inputs without name
      * @returns {string}
      * @private
      */
-    function _input_name_deduce(input, inputIndex, names) {
+    function _input_name_deduce(input, inputIndex, names, inputWNameIndex) {
         //Init result
         var inputName = '';
         //Place holder ?
@@ -157,7 +158,7 @@ var DOM_UTILS = (function () {
         if (!inputName) {
             //Name or ID ?
             inputName = _attr(input, 'name') || inputID
-                || 'input[' + inputIndex + ']';
+                || 'input[' + (inputWNameIndex++) + ']';
         }
         //Remove punctuation from input name
         var plInputName = inputName.replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g, '');
@@ -173,8 +174,11 @@ var DOM_UTILS = (function () {
         }
         //Push given name into registered names
         names.push(inputName);
-        //Return final name
-        return inputName;
+        //Return final struct
+        return {
+            name: inputName,
+            inputWNameIndex: inputWNameIndex
+        };
     }
 
     /**
@@ -190,7 +194,9 @@ var DOM_UTILS = (function () {
             ",select, textarea")),
             finputs = [],
             //Save input names
-            inputNames = [];
+            inputNames = [],
+            //Inputs without name (index)
+            inputWNameIndex = 0;
         //Filter visible inputs
         inputs = inputs.filter(function (element) {
             return _dom_visible(element);
@@ -199,13 +205,17 @@ var DOM_UTILS = (function () {
         for (var j = 0, ilen = inputs.length; j < ilen; ++j) {
             //Current input
             var input = inputs[j],
+                //Deduce input name
+                inputNameStruct = _input_name_deduce(input, j, inputNames, inputWNameIndex),
                 //Final input structure
                 iStruct = {
                     element: input,
                     type: input.type,
-                    name: _input_name_deduce(input, j, inputNames),
+                    name: inputNameStruct.name,
                     xpath: DOM_UTILS.xpath(input)
                 };
+            //Set inputs without name index
+            inputWNameIndex = inputNameStruct.inputWNameIndex;
             //Add struct to result
             finputs.push(iStruct);
         }
