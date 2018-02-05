@@ -159,8 +159,10 @@ var DOM_UTILS = (function () {
             inputName = _attr(input, 'name') || inputID
                 || 'input[' + inputIndex + ']';
         }
-        //Trim name
-        inputName = inputName.trim();
+        //Remove punctuation from input name
+        var plInputName = inputName.replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g, '');
+        //Extra-spaces & trim
+        inputName = plInputName.replace(/\s{2,}/g, ' ').trim();
         //Check if name was already used
         var nameExists = names.indexOf(inputName);
         if (nameExists > -1) {
