@@ -68,11 +68,11 @@ var DOM_UTILS = (function () {
 
                 //Get input parent
                 var inputParent = input.parentElement,
-                    inputParentPreviousSibling,
-                    inputPreviousSibling = input.previousSibling;
+                    //Get siblings
+                    inputParentPreviousSibling, inputPreviousSibling;
 
                 //Check text node before parent or input
-                if (!(inputPreviousSibling
+                if (!((inputPreviousSibling = input.previousSibling)
                         && (inputPreviousSibling.nodeType === 3)
                         && (inputName = inputPreviousSibling.textContent.trim()))) {
                     if (!(inputParent
@@ -147,7 +147,7 @@ var DOM_UTILS = (function () {
                         } else {
                             //Check previous sibling element
                             var previousSiblingElem = input.previousElementSibling;
-                            if (previousSiblingElem.tagName === 'LABEL') {
+                            if (previousSiblingElem && previousSiblingElem.tagName === 'LABEL') {
                                 inputName = previousSiblingElem.firstChild.textContent;
                             }
                         }
