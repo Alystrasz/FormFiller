@@ -75,7 +75,7 @@ function _action_forms_get() {
                     var changedField = t[0],
                         modelField = associatedForm.fields[changedField.name],
                         domField = DOM_UTILS.fromXPath(modelField.xpath);
-
+                    console.log(domField, changedField);
                     domField.value = changedField.newest;
                 });
             }());

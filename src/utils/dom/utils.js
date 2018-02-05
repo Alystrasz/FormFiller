@@ -52,12 +52,15 @@ var DOM_UTILS = (function () {
      * @param input
      * @param inputIndex (Used if no criteria has been found to deduce the name)
      * @param names Already registered names
+     * @param inputWNameIndex Index of inputs without name
      * @returns {string}
      * @private
      */
-    function _input_name_deduce(input, inputIndex, names) {
+    function _input_name_deduce(input, inputIndex, names, inputWNameIndex) {
         //Init result
-        var inputName = '';
+        var inputName = '',
+            //Input ID
+            inputID = _attr(input, 'id');
         //Place holder ?
         if (!(inputName = _attr(input, 'placeholder'))) {
             //Aria label ?
@@ -65,11 +68,11 @@ var DOM_UTILS = (function () {
 
                 //Get input parent
                 var inputParent = input.parentElement,
-                    inputParentPreviousSibling,
-                    inputPreviousSibling = input.previousSibling;
+                    //Get siblings
+                    inputParentPreviousSibling, inputPreviousSibling;
 
                 //Check text node before parent or input
-                if (!(inputPreviousSibling
+                if (!((inputPreviousSibling = input.previousSibling)
                         && (inputPreviousSibling.nodeType === 3)
                         && (inputName = inputPreviousSibling.textContent.trim()))) {
                     if (!(inputParent
@@ -136,17 +139,17 @@ var DOM_UTILS = (function () {
 
 
                         //Init label search
-                        var inputLabel,
-                            inputID = _attr(input, 'id');
+                        var inputLabel;
                         //Seek for label, starting from input parent
-                        if (!(inputLabel = labelSeek(inputParent, inputID))) {
-                            //Trying without id
-                            inputLabel = labelSeek(inputParent);
-                        }
-                        //If label has been found
-                        if (inputLabel) {
+                        if (inputLabel = labelSeek(inputParent, inputID)) {
                             //Label text content
                             inputName = inputLabel.firstChild.textContent;
+                        } else {
+                            //Check previous sibling element
+                            var previousSiblingElem = input.previousElementSibling;
+                            if (previousSiblingElem && previousSiblingElem.tagName === 'LABEL') {
+                                inputName = previousSiblingElem.firstChild.textContent;
+                            }
                         }
                     }
 
@@ -157,10 +160,12 @@ var DOM_UTILS = (function () {
         if (!inputName) {
             //Name or ID ?
             inputName = _attr(input, 'name') || inputID
-                || 'input[' + inputIndex + ']';
+                || 'input[' + (inputWNameIndex++) + ']';
         }
-        //Trim name
-        inputName = inputName.trim();
+        //Remove punctuation from input name
+        var plInputName = inputName.replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g, ' ');
+        //Extra-spaces & trim
+        inputName = plInputName.replace(/\s{2,}/g, ' ').trim();
         //Check if name was already used
         var nameExists = names.indexOf(inputName);
         if (nameExists > -1) {
@@ -171,8 +176,11 @@ var DOM_UTILS = (function () {
         }
         //Push given name into registered names
         names.push(inputName);
-        //Return final name
-        return inputName;
+        //Return final struct
+        return {
+            name: inputName,
+            inputWNameIndex: inputWNameIndex
+        };
     }
 
     /**
@@ -188,7 +196,9 @@ var DOM_UTILS = (function () {
             ",select, textarea")),
             finputs = [],
             //Save input names
-            inputNames = [];
+            inputNames = [],
+            //Inputs without name (index)
+            inputWNameIndex = 0;
         //Filter visible inputs
         inputs = inputs.filter(function (element) {
             return _dom_visible(element);
@@ -197,13 +207,17 @@ var DOM_UTILS = (function () {
         for (var j = 0, ilen = inputs.length; j < ilen; ++j) {
             //Current input
             var input = inputs[j],
+                //Deduce input name
+                inputNameStruct = _input_name_deduce(input, j, inputNames, inputWNameIndex),
                 //Final input structure
                 iStruct = {
                     element: input,
                     type: input.type,
-                    name: _input_name_deduce(input, j, inputNames),
+                    name: inputNameStruct.name,
                     xpath: DOM_UTILS.xpath(input)
                 };
+            //Set inputs without name index
+            inputWNameIndex = inputNameStruct.inputWNameIndex;
             //Add struct to result
             finputs.push(iStruct);
         }
