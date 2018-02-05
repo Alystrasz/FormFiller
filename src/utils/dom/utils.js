@@ -130,6 +130,11 @@ var DOM_UTILS = (function () {
                 //Seek for label, starting from input parent
                 if (inputParent) {
                     inputLabel = labelSeek(inputParent, inputID);
+                    //Check label
+                    if(!inputLabel){
+                        //Trying without id
+                        inputLabel = labelSeek(inputParent);
+                    }
                 }
 
                 //Label not found ? **Last criteria**
