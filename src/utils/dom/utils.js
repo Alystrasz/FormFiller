@@ -163,7 +163,7 @@ var DOM_UTILS = (function () {
                 || 'input[' + (inputWNameIndex++) + ']';
         }
         //Remove punctuation from input name
-        var plInputName = inputName.replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g, '');
+        var plInputName = inputName.replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g, ' ');
         //Extra-spaces & trim
         inputName = plInputName.replace(/\s{2,}/g, ' ').trim();
         //Check if name was already used
