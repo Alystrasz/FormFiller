@@ -22,13 +22,8 @@ function _get_forms() {
         //Check eligibility
         if (fFields.length > 0) {
             //TODO : snippet, re-implement in a safe way
-            var formMetas = {
-                uuid: COMPUTING.uuid(),
-                xpath: DOM_UTILS.xpath(forms[i]),
-                origin: location.origin + location.pathname
-            };
             //DEBUG : print associated form model
-            var fModel = DOM_UTILS.fields_model(formMetas, fFields);
+            var fModel = DOM_UTILS.fields_model(forms[i], fFields);
             console.log('----------------------------------------');
             console.log(' FORM APPLICATION MODEL');
             console.log('----------------------------------------');
