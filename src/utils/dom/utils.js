@@ -33,15 +33,15 @@ var DOM_UTILS = (function () {
      */
     function _xpath(element) {
         if (element.id !== '')
-            return '[id="' + element.id + '"]';
+            return 'id("' + element.id + '")';
         if (element === document.body)
-            return element.tagName.toLowerCase();
+            return '//' + element.tagName;
         var ix = 0,
             siblings = element.parentNode.childNodes;
-        for (var i = 0; i < siblings.length; i++) {
+        for (var i = 0, slen = siblings.length; i < slen; i++) {
             var sibling = siblings[i];
             if (sibling === element)
-                return _xpath(element.parentNode) + '>' + element.tagName.toLowerCase() + (ix > 0 ? ':nth-child(' + (ix + 1) + ')' : '');
+                return _xpath(element.parentNode) + '/' + element.tagName + '[' + (ix + 1) + ']';
             if (sibling.nodeType === 1 && sibling.tagName === element.tagName)
                 ix++;
         }
@@ -131,7 +131,7 @@ var DOM_UTILS = (function () {
                 if (inputParent) {
                     inputLabel = labelSeek(inputParent, inputID);
                     //Check label
-                    if(!inputLabel){
+                    if (!inputLabel) {
                         //Trying without id
                         inputLabel = labelSeek(inputParent);
                     }
@@ -238,17 +238,28 @@ var DOM_UTILS = (function () {
     function _fields_template(fieldsModel) {
         //Init template
         var formFillTemplate = {
-                associatedForm : fieldsModel.uuid,
-                data:{}
-            }, modelFields = fieldsModel.fields;
+            associatedForm: fieldsModel.uuid,
+            data: {}
+        }, modelFields = fieldsModel.fields;
         //Copy fields names
-        for(var k in modelFields){
-            formFillTemplate.data[k] = '';
+        for (var k in modelFields) {
+            if (modelFields.hasOwnProperty(k))
+                formFillTemplate.data[k] = '';
         }
         //Return template
         return formFillTemplate;
     }
 
+    /**
+     * Query node with given xpath
+     * @param query
+     * @returns {Node}
+     * @private
+     */
+    function _xpathQuery(query) {
+        var evaluateXPath = document.evaluate(query, document, null, XPathResult.ANY_TYPE, null);
+        return evaluateXPath.iterateNext();
+    }
 
     /**
      * Get forms of given parent node or default
@@ -262,9 +273,10 @@ var DOM_UTILS = (function () {
 
     return {
         xpath: _xpath,
+        fromXPath: _xpathQuery,
         fields: _fields,
         fields_model: _fields_model,
-        fields_template:_fields_template,
+        fields_template: _fields_template,
         forms: _forms
     }
 

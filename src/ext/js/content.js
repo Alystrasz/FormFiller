@@ -17,6 +17,32 @@ ACTIONS_MAPPER.map('get_forms', _action_forms_get);
 MESSAGE_HANDLER.from('POPUP', ACTIONS_MAPPER.process);
 
 
+//TODO: tmp for demo ( oui c'est fait à l'arrache ;) )
+function _compare(obj1, obj2, changed) {
+    for (var k in obj2) {
+        if (typeof obj2[k] === 'object') {
+            _compare(obj1[k], obj2[k], changed);
+        } else {
+            if (obj1[k] !== obj2[k]) {
+                changed.push({name: k, old: obj1[k], newest: obj2[k]});
+                obj1[k] = obj2[k];
+            }
+        }
+    }
+}
+
+function _observe(obj, clbk) {
+    var baseVars = JSON.parse(JSON.stringify(obj));
+    setInterval(function () {
+        var changed = [];
+        _compare(baseVars, obj, changed);
+        if (changed.length > 0) {
+            clbk(changed);
+        }
+
+    }, 1E3 / 60);
+}
+
 /**
  * ACTION: Get forms
  * @private
@@ -40,10 +66,21 @@ function _action_forms_get() {
             console.log('----------------------------------------');
             console.log(' FORM USER MODEL');
             console.log('----------------------------------------');
-            console.log(DOM_UTILS.fields_template(fModel));
+            var userModel = DOM_UTILS.fields_template(fModel);
+            //TODO : FOR DEMO ONLY
+            (function () {
+                var associatedForm = fModel;
+                _observe(userModel, function (t) {
+                    //Changed field
+                    var changedField = t[0],
+                        modelField = associatedForm.fields[changedField.name],
+                        domField = DOM_UTILS.fromXPath(modelField.xpath);
 
-            console.log('');
-            console.log('');
+                    domField.value = changedField.newest;
+                });
+            }());
+            console.dir(userModel);
+
 
             //Apply form class mark
             forms[i].classList.add('formfiller_mark');
