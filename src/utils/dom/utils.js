@@ -59,94 +59,105 @@ var DOM_UTILS = (function () {
         //Init result
         var inputName = '';
         //Place holder ?
-        if (inputName = _attr(input, 'placeholder')) {
-        } else {
+        if (!(inputName = _attr(input, 'placeholder'))) {
             //Aria label ?
-            if (inputName = _attr(input, 'aria-label')) {
-            } else {
+            if (!(inputName = _attr(input, 'aria-label'))) {
 
-                /**
-                 * Seek for a <label> in given node children with optional label<for=optFor>
-                 * @param node
-                 * @param optFor
-                 * @returns {*}
-                 */
-                function childLabelSeek(node, optFor) {
-                    //Init result
-                    var result = null;
-                    //Check node
-                    if (node) {
-                        //Get children list
-                        var children = node.children;
-                        //For each, while not found
-                        for (var c = 0, chLen = children.length; (c < chLen && !result); ++c) {
-                            //Current child
-                            var cChild = children[c];
-                            //If <label>
-                            if (cChild.tagName === 'LABEL') {
-                                //Opt label<for=''> or ignore
-                                if ((cChild.getAttribute('for') === optFor)
-                                    || !optFor)
-                                    return cChild;
-                            } else {
-                                //Deep seek into current node children
-                                result = childLabelSeek(cChild, optFor);
+                //Get input parent
+                var inputParent = input.parentElement,
+                    inputParentPreviousSibling,
+                    inputPreviousSibling = input.previousSibling;
+
+                //Check text node before parent or input
+                if (!(inputPreviousSibling
+                        && (inputPreviousSibling.nodeType === 3)
+                        && (inputName = inputPreviousSibling.textContent.trim()))) {
+                    if (!(inputParent
+                            && (inputParentPreviousSibling = inputParent.previousSibling)
+                            && (inputParentPreviousSibling.nodeType === 3)
+                            && (inputName = inputParentPreviousSibling.textContent.trim())) && inputParent) {
+
+                        /**
+                         * Seek for a <label> in given node children with optional label<for=optFor>
+                         * @param node
+                         * @param optFor
+                         * @returns {*}
+                         */
+                        function childLabelSeek(node, optFor) {
+                            //Init result
+                            var result = null;
+                            //Check node
+                            if (node) {
+                                //Get children list
+                                var children = node.children;
+                                //For each, while not found
+                                for (var c = 0, chLen = children.length; (c < chLen && !result); ++c) {
+                                    //Current child
+                                    var cChild = children[c];
+                                    //If <label>
+                                    if (cChild.tagName === 'LABEL') {
+                                        //Opt label<for=''> or ignore
+                                        if ((cChild.getAttribute('for') === optFor)
+                                            || !optFor)
+                                            return cChild;
+                                    } else {
+                                        //Deep seek into current node children
+                                        result = childLabelSeek(cChild, optFor);
+                                    }
+                                }
                             }
+                            //Return node (found or not)
+                            return result;
+                        }
+
+                        /**
+                         * Seek for <label> in given node with optional label<for=forId>
+                         * @param node
+                         * @param forId
+                         * @returns {*}
+                         */
+                        function labelSeek(node, forId) {
+                            //Check if node is not going out of document
+                            if (node !== document.body) {
+                                //Seek for given label
+                                var seekChild = childLabelSeek(node, forId);
+                                //If not found
+                                if (!seekChild) {
+                                    //Seek in current node parent
+                                    return labelSeek(node.parentElement, forId);
+                                } else {
+                                    //FOUND !
+                                    return seekChild;
+                                }
+                            }
+                            //Not found at all
+                            return null;
+                        }
+
+
+                        //Init label search
+                        var inputLabel,
+                            inputID = _attr(input, 'id');
+                        //Seek for label, starting from input parent
+                        if (!(inputLabel = labelSeek(inputParent, inputID))) {
+                            //Trying without id
+                            inputLabel = labelSeek(inputParent);
+                        }
+                        //If label has been found
+                        if (inputLabel) {
+                            //Label text content
+                            inputName = inputLabel.firstChild.textContent;
                         }
                     }
-                    //Return node (found or not)
-                    return result;
-                }
 
-                /**
-                 * Seek for <label> in given node with optional label<for=forId>
-                 * @param node
-                 * @param forId
-                 * @returns {*}
-                 */
-                function labelSeek(node, forId) {
-                    //Check if node is not going out of document
-                    if (node !== document.body) {
-                        //Seek for given label
-                        var seekChild = childLabelSeek(node, forId);
-                        //If not found
-                        if (!seekChild) {
-                            //Seek in current node parent
-                            return labelSeek(node.parentElement, forId);
-                        } else {
-                            //FOUND !
-                            return seekChild;
-                        }
-                    }
-                    //Not found at all
-                    return null;
-                }
-
-
-                //Init label search
-                var inputLabel,
-                    inputID = _attr(input, 'id'),
-                    inputParent = input.parentElement;
-                //Seek for label, starting from input parent
-                if (inputParent) {
-                    inputLabel = labelSeek(inputParent, inputID);
-                    //Check label
-                    if (!inputLabel) {
-                        //Trying without id
-                        inputLabel = labelSeek(inputParent);
-                    }
-                }
-
-                //Label not found ? **Last criteria**
-                if (!inputLabel) {
-                    //Name or ID ?
-                    inputName = _attr(input, 'name') || inputID
-                        || 'input[' + inputIndex + ']';
-                } else {
-                    //Label text content
-                    inputName = inputLabel.firstChild.textContent;
                 }
             }
+        }
+        //**Last criteria** (default)
+        if (!inputName) {
+            //Name or ID ?
+            inputName = _attr(input, 'name') || inputID
+                || 'input[' + inputIndex + ']';
         }
         //Trim name
         inputName = inputName.trim();
