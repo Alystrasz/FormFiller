@@ -9,11 +9,19 @@ MESSAGE_HANDLER.from('BACKGROUND', function (message) {
 
 });
 
+//*** ACTIONS MAP***//
+ACTIONS_MAPPER.map('get_forms', _action_forms_get);
+
+//From : POPUP
+//Handle actions with mapper
+MESSAGE_HANDLER.from('POPUP', ACTIONS_MAPPER.process);
+
+
 /**
- * Get forms (TMP : will be moved to an action class)
+ * ACTION: Get forms
  * @private
  */
-function _get_forms() {
+function _action_forms_get() {
     //Get forms
     var forms = DOM_UTILS.forms(), fmsInputs = [];
     for (var i = 0, flen = forms.length; i < flen; ++i) {
@@ -21,7 +29,6 @@ function _get_forms() {
         var fFields = DOM_UTILS.fields(forms[i]);
         //Check eligibility
         if (fFields.length > 0) {
-            //TODO : snippet, re-implement in a safe way
             //DEBUG : print associated form model
             var fModel = DOM_UTILS.fields_model(forms[i], fFields);
             console.log('----------------------------------------');
@@ -29,20 +36,11 @@ function _get_forms() {
             console.log('----------------------------------------');
             console.log(JSON.stringify(fModel, null, 2));
 
-            //TODO : tmp, implement this in a safe way
-            var formAssociatedUserModel = {
-                associatedForm : fModel.uuid,
-                data:{}
-                },
-                modelFields = fModel.fields;
-            for(var k in modelFields){
-                formAssociatedUserModel.data[k] = '';
-            }
 
             console.log('----------------------------------------');
             console.log(' FORM USER MODEL');
             console.log('----------------------------------------');
-            console.log(formAssociatedUserModel);
+            console.log(DOM_UTILS.fields_template(fModel));
 
             console.log('');
             console.log('');
@@ -56,12 +54,3 @@ function _get_forms() {
     //Display in tab console
     FormFillerLog.log('Found forms >', fmsInputs);
 }
-
-//From : POPUP
-MESSAGE_HANDLER.from('POPUP', function (message) {
-
-    //Action: get_forms
-    if (message === 'get_forms') {
-        _get_forms();
-    }
-});

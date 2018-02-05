@@ -34,6 +34,7 @@
         "src/utils/dom/utils.js",
         "src/utils/log/log.js",
         "src/utils/computing/computing.js",
+        "src/utils/actions/mapper.js",
         "src/ext/js/content.js"
       ],
       "run_at": "document_end"

@@ -220,11 +220,28 @@ var DOM_UTILS = (function () {
                 xpath: cField.xpath
             }
         }
+        //Return fields model
         return fModel;
     }
 
-    function _fields_template(parentModel) {
-
+    /**
+     * Get a 'fill' template of given fields model
+     * @param fieldsModel
+     * @returns {{associatedForm: *|uuidv4, data: {}}}
+     * @private
+     */
+    function _fields_template(fieldsModel) {
+        //Init template
+        var formFillTemplate = {
+                associatedForm : fieldsModel.uuid,
+                data:{}
+            }, modelFields = fieldsModel.fields;
+        //Copy fields names
+        for(var k in modelFields){
+            formFillTemplate.data[k] = '';
+        }
+        //Return template
+        return formFillTemplate;
     }
 
 
@@ -242,6 +259,7 @@ var DOM_UTILS = (function () {
         xpath: _xpath,
         fields: _fields,
         fields_model: _fields_model,
+        fields_template:_fields_template,
         forms: _forms
     }
 
