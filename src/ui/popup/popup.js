@@ -11,7 +11,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     //From : BACKGROUND
     MESSAGE_HANDLER.from('BACKGROUND', function (message) {
-
+        console.log(message);
     });
 
     //Attach action to found form button
@@ -26,7 +26,7 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
     function _handle_data(obj) {
-        MESSAGE_HANDLER.send('RECEIVE_OBJECT', obj, true);
+        MESSAGE_HANDLER.send('BACKGROUND', obj);
     }
 
     function import_json() {

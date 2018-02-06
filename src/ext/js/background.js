@@ -13,27 +13,40 @@ MESSAGE_HANDLER.from('CONTENT_SCRIPT', function (message) {
 });
 
 //From : POPUP
-MESSAGE_HANDLER.from('POPUP', function (message) {
+MESSAGE_HANDLER.from('POPUP', function (obj) {
 
-});
-
-MESSAGE_HANDLER.from('RECEIVE_OBJECT', function (obj) {
     FormFillerLog.info('File received from user.');
     console.log(obj);
     let result;
+    let status = true;
+    let message = 'File parsed successfully!';
 
     //Is this JSON or YAML formatted?
     switch(obj.ext) {
         case 'json':
-            result = JSON.parse(obj.content);
+            try {
+                result = JSON.parse(obj.content);
+            } catch (e) {
+                status = false;
+                message = e.toString();
+            }
             break;
         case 'yaml':
-            result = jsyaml.load(obj.content);
+            try {
+                result = jsyaml.load(obj.content);
+            } catch (e) {
+                status = false;
+                message = e.toString();
+            }
             break;
         default:
-            FormFillerLog.error('File extension ' + obj.ext + ' not supported.');
-            return;
+            message = 'File extension ' + obj.ext + ' not supported.';
+            status = false;
     }
 
-    FormFillerLog.log('File sucessfully loaded.');
+    MESSAGE_HANDLER.send('POPUP', {
+        status: status,
+        content: result,
+        message: message
+    });
 });
