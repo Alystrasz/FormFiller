@@ -67,7 +67,7 @@ var STORAGE_UTILS = (function () {
      * @private
      **/
     function _yaml_to_json(yaml) {
-
+        return jsyaml.load(yaml);
     }
 
     var exports = {
@@ -76,6 +76,9 @@ var STORAGE_UTILS = (function () {
         },
         get: function (key) {
             return _get(key);
+        },
+        yaml_to_json: function(yaml) {
+            return _yaml_to_json(yaml);
         }
     };
 

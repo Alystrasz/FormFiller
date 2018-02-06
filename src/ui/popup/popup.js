@@ -24,24 +24,26 @@ document.addEventListener('DOMContentLoaded', function () {
     document.getElementById('file').addEventListener('change', () => {
         import_json();
     });
+
+    function _handle_data(obj) {
+        MESSAGE_HANDLER.send('RECEIVE_OBJECT', obj, true);
+    }
+
+    function import_json() {
+        var input = document.getElementById('file');
+        var current_data = input.files.item(0);
+        var content = undefined;
+
+        var file = input.files[0];
+        let reader = new FileReader();
+
+        reader.onload = function () {
+            content = (this.result);
+            _handle_data({
+                ext: current_data.name.split('.').pop(),
+                content: content
+            });
+        };
+        reader.readAsText(current_data);
+    }
 });
-
-
-function import_json() {
-    var input = document.getElementById('file');
-    var current_data = input.files.item(0);
-    var content = undefined;
-
-    var file = input.files[0];
-    let reader = new FileReader();
-
-    reader.onload = function () {
-        content = (this.result);
-        _handle_data(JSON.parse(content));
-    };
-    reader.readAsText(current_data);
-}
-
-function _handle_data(obj) {
-    console.log(obj);
-}
