@@ -43,9 +43,13 @@ MESSAGE_HANDLER.from('POPUP', function (obj) {
             status = false;
     }
 
+
+
     MESSAGE_HANDLER.send('POPUP', {
         status: status,
         content: result,
         message: message
     });
+
+    return true;
 });

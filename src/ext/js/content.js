@@ -7,12 +7,10 @@ var MESSAGE_HANDLER = BROWSER_UTILS.MESSAGE.register('CONTENT_SCRIPT');
 //*** ACTIONS MAP***//
 ACTIONS_MAPPER.map('get_forms', _action_forms_get);
 
+MESSAGE_HANDLER.send('BACKGROUND','test')
 
 //From : BACKGROUND
 MESSAGE_HANDLER.from('BACKGROUND', ACTIONS_MAPPER.process);
-
-//Send message test BG **A SUPPRIMER**
-MESSAGE_HANDLER.send('BACKGROUND', 'hello');
 
 //From : POPUP
 MESSAGE_HANDLER.from('POPUP', ACTIONS_MAPPER.process);
