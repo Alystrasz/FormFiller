@@ -8,7 +8,8 @@ var MESSAGE_HANDLER = BROWSER_UTILS.MESSAGE.register('BACKGROUND');
 
 //From : CONTENT_SCRIPT
 MESSAGE_HANDLER.from('CONTENT_SCRIPT', function (message) {
-
+    FormFillerLog.log('Received from content script : ' + message);
+    MESSAGE_HANDLER.send('CONTENT_SCRIPT', 'test_action_bg', true);
 });
 
 //From : POPUP

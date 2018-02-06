@@ -20,7 +20,6 @@ var BROWSER_UTILS = (function (namespace) {
     };
 
 
-
     /**
      * Active tab getter
      * @private
@@ -28,8 +27,8 @@ var BROWSER_UTILS = (function (namespace) {
     function _tab_active() {
         //Get current tab
         return namespace.tabs.query({
-            active:true,
-            currentWindow:true
+            active: true,
+            currentWindow: true
         });
     }
 
@@ -55,6 +54,7 @@ var BROWSER_UTILS = (function (namespace) {
             if (request.from === from && request.receiver === receiver) {
                 clbk(request.content, sender);
             }
+            return true;
         });
     }
 
@@ -80,7 +80,7 @@ var BROWSER_UTILS = (function (namespace) {
             //Get active tab
             _tab_active().then(function (tabs) {
                 //Given destination is a tab context (current tab)
-                namespace.tabs.sendMessage(tabs[0].id, messageContent);
+                if (tabs[0]) namespace.tabs.sendMessage(tabs[0].id, messageContent);
             });
         }
     }
