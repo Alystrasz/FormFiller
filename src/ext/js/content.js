@@ -6,12 +6,7 @@ var MESSAGE_HANDLER = BROWSER_UTILS.MESSAGE.register('CONTENT_SCRIPT');
 
 //*** ACTIONS MAP***//
 ACTIONS_MAPPER.map('get_forms', _action_forms_get);
-ACTIONS_MAPPER.map('test_action_bg', _action_test_bg);
 
-//Called when bg action is received
-function _action_test_bg(){
-    FormFillerLog.log('_action_test_bg() called');
-}
 
 //From : BACKGROUND
 MESSAGE_HANDLER.from('BACKGROUND', ACTIONS_MAPPER.process);
