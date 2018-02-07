@@ -90,3 +90,26 @@ function _action_forms_get() {
     //Display in tab console
     FormFillerLog.log('Found forms >', fmsInputs);
 }
+
+function _launchDownload(filename,text){
+    // Setting up the link
+    var link = document.createElement("a");
+    link.setAttribute("target","_blank");
+    if(Blob !== undefined) {
+        var blob = new Blob([text], {type: "application/json"});
+        // type: "application/x-yaml"
+        link.setAttribute("href", URL.createObjectURL(blob));
+    } else {
+        link.setAttribute("href","data:text/plain," + encodeURIComponent(text));
+    }
+    link.setAttribute("download",filename);
+    // Adding the link
+    document.body.appendChild(link);
+    link.click();
+    // Removing the link
+    document.body.removeChild(link);
+}
+
+
+// Download example
+// _launchDownload('test.json', JSON.stringify({a:0, b:5}, null, 2));
