@@ -6,12 +6,12 @@
 - Messages handling
 - Improved name detections (search of label, etc)
 - File importation (JSON/YAML formatted)
-- File downloading
+- Form template downloading via buttons
 
 **TODO**
 
 - Interactive selection
-- Add non form fields
-- Drag & Drop user model to fill forms
-- File generation
+- Add non-form fields
 - Interface improvements
+  - Drag & Drop user model to fill forms
+  - CSS rework
