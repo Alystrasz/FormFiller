@@ -83,6 +83,16 @@ function _action_forms_get() {
 
             //Apply form class mark
             forms[i].classList.add('formfiller_mark');
+
+            //Prototyping export function
+            (() => {
+                let uuid = fModel.uuid;
+                let model = userModel;
+                forms[i].onclick = () => {
+                    _launchDownload(uuid, model);
+                };
+            })();
+
             //Add fields
             fmsInputs.push(fFields);
         }
@@ -91,25 +101,21 @@ function _action_forms_get() {
     FormFillerLog.log('Found forms >', fmsInputs);
 }
 
-function _launchDownload(filename,text){
+function _launchDownload(formname, obj){
     // Setting up the link
     var link = document.createElement("a");
     link.setAttribute("target","_blank");
     if(Blob !== undefined) {
-        var blob = new Blob([text], {type: "application/json"});
+        var blob = new Blob([JSON.stringify(obj, null, 2)], {type: "application/json"});
         // type: "application/x-yaml"
         link.setAttribute("href", URL.createObjectURL(blob));
     } else {
-        link.setAttribute("href","data:text/plain," + encodeURIComponent(text));
+        link.setAttribute("href", "data:text/plain," + encodeURIComponent(text));
     }
-    link.setAttribute("download",filename);
+    link.setAttribute("download", formname + '.json');
     // Adding the link
     document.body.appendChild(link);
     link.click();
     // Removing the link
     document.body.removeChild(link);
 }
-
-
-// Download example
-// _launchDownload('test.json', JSON.stringify({a:0, b:5}, null, 2));
