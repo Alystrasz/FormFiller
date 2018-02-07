@@ -88,9 +88,16 @@ function _action_forms_get() {
             (() => {
                 let uuid = fModel.uuid;
                 let model = userModel;
-                forms[i].onclick = () => {
+
+                let btn = document.createElement('button');
+                btn.className = 'formfiller_download_btn';
+                btn.innerText = "Download form template";
+                btn.setAttribute('type', 'button');
+                btn.onclick = () => {
                     _launchDownload(uuid, model);
                 };
+
+                forms[i].appendChild(btn);
             })();
 
             //Add fields

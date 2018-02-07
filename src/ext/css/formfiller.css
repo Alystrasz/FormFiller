@@ -6,3 +6,13 @@
     cursor: pointer !important;
     background: rgba(255,0,0,0.2);
 }
+
+.formfiller_mark .formfiller_download_btn {
+    opacity: 0;
+    margin: 0 0 0 60%;
+}
+
+.formfiller_mark:hover .formfiller_download_btn {
+    opacity: 1;
+    display: block;
+}
