@@ -6,12 +6,17 @@
 - Messages handling
 - Improved name detections (search of label, etc)
 - File importation (JSON/YAML formatted)
+
+### February 14th
 - Form template downloading via buttons
+- Interactive selection
+    - CSS
+    - Individual selection
 
 **TODO**
 
 - Interactive selection
-  - CSS
+  - by default all inputs are selected
   - delete non-selected fields from export model
 - Fields autofill
   - Form detection (with the key stored in json)

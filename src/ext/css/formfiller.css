@@ -16,3 +16,8 @@
     opacity: 1;
     display: block;
 }
+
+.formfiller_mark [selected] {
+    background-color: rgba(255,140,0,0.2) !important;
+    border: 2px solid DarkOrange !important;
+}

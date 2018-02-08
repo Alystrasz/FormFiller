@@ -85,11 +85,11 @@ function _action_forms_get() {
             forms[i].classList.add('formfiller_mark');
 
             //Prototyping export function
-            (() => {
-                let uuid = fModel.uuid;
-                let model = userModel;
+            (function() {
+                var uuid = fModel.uuid;
+                var model = userModel;
 
-                let btn = document.createElement('button');
+                var btn = document.createElement('button');
                 btn.className = 'formfiller_download_btn';
                 btn.innerText = "Download form template";
                 btn.setAttribute('type', 'button');
@@ -99,6 +99,18 @@ function _action_forms_get() {
 
                 forms[i].appendChild(btn);
             })();
+
+            //Adding selection listeners
+            (function() {
+                var fields = fFields;
+                for(var i=0, len=fields.length; i<len; i++) {
+                    let field = fields[i].element;
+                    field.addEventListener('click', function() {
+                        _select_input(field);
+                    }, true);
+                }
+            })()
+
 
             //Add fields
             fmsInputs.push(fFields);
@@ -125,4 +137,13 @@ function _launchDownload(formname, obj){
     link.click();
     // Removing the link
     document.body.removeChild(link);
+}
+
+function _select_input(node) {
+    var selected = node.getAttribute('selected');
+    if(selected === null)
+        node.setAttribute('selected', '');
+    else
+        node.removeAttribute('selected');
+
 }
