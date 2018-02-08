@@ -84,6 +84,13 @@ function _action_forms_get() {
             //Apply form class mark
             forms[i].classList.add('formfiller_mark');
 
+            (function() {
+                var fields = fFields;
+                forms[i].addEventListener('click', function() {
+                    _select_all_inputs(fields);
+                }, false);
+            })();
+
             //Prototyping export function
             (function() {
                 var uuid = fModel.uuid;
@@ -103,11 +110,13 @@ function _action_forms_get() {
             //Adding selection listeners
             (function() {
                 var fields = fFields;
+
                 for(var i=0, len=fields.length; i<len; i++) {
                     let field = fields[i].element;
-                    field.addEventListener('click', function() {
+                    field.addEventListener('click', function(e) {
                         _select_input(field);
-                    }, true);
+                        e.stopPropagation();
+                    }, false);
                 }
             })()
 
@@ -145,5 +154,11 @@ function _select_input(node) {
         node.setAttribute('selected', '');
     else
         node.removeAttribute('selected');
+}
 
+function _select_all_inputs(fFields) {
+    for(var i=0, len=fFields.length; i<len; i++) {
+        var elem = fFields[i].element;
+        _select_input(elem);
+    }
 }

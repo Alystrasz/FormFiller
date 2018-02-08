@@ -11,17 +11,15 @@
 - Form template downloading via buttons
 - Interactive selection
     - CSS
-    - Individual selection
+    - Individual/multiple selection
+    - All inputs are selected by default
 
 **TODO**
 
 - Interactive selection
-  - by default all inputs are selected
-  - delete non-selected fields from export model
+  - export selected inputs only
 - Fields autofill
   - Form detection (with the key stored in json)
   - Autofill via prototype
 - Add non-form fields
-- Interface improvements
-  - Drag & Drop user model to fill forms
-  - CSS rework
+- Interface improvements (CSS rework)
