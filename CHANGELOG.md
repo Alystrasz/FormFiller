@@ -11,6 +11,11 @@
 **TODO**
 
 - Interactive selection
+  - CSS
+  - delete non-selected fields from export model
+- Fields autofill
+  - Form detection (with the key stored in json)
+  - Autofill via prototype
 - Add non-form fields
 - Interface improvements
   - Drag & Drop user model to fill forms
