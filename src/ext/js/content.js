@@ -84,6 +84,7 @@ function _action_forms_get() {
             //Apply form class mark
             forms[i].classList.add('formfiller_mark');
 
+            //Adding all inputs selection listener
             (function() {
                 var fields = fFields;
                 forms[i].addEventListener('click', function() {
@@ -94,17 +95,26 @@ function _action_forms_get() {
             //Prototyping export function
             (function() {
                 var uuid = fModel.uuid;
-                var model = userModel;
+                var form = forms[i];
+                var fields = DOM_UTILS.fields(form, true);
+                var tModel = DOM_UTILS.fields_model(form, fields);
 
                 var btn = document.createElement('button');
                 btn.className = 'formfiller_download_btn';
                 btn.innerText = "Download form template";
                 btn.setAttribute('type', 'button');
-                btn.onclick = () => {
-                    _launchDownload(uuid, model);
+                btn.onclick = (e) => {
+                    e.stopPropagation();
+                    //Refreshing data
+                    fields = DOM_UTILS.fields(form, true);
+                    tModel = DOM_UTILS.fields_model(form, fields);
+                    uuid = tModel.uuid;
+                    //Launching new model download
+                    var selectionsModel = DOM_UTILS.fields_template(tModel);
+                    _launchDownload(uuid, selectionsModel);
                 };
 
-                forms[i].appendChild(btn);
+                form.appendChild(btn);
             })();
 
             //Adding selection listeners

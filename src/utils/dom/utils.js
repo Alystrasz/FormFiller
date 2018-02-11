@@ -186,10 +186,11 @@ var DOM_UTILS = (function () {
     /**
      * Return found fields of a given node
      * @param node
+     * @param {Boolean} selectedOnly whether to return selected fields only or not
      * @returns {Array}
      * @private
      */
-    function _fields(node) {
+    function _fields(node, selectedOnly) {
         //Get inputs & selects (as array)
         var inputs = Array.prototype.slice.call(node.querySelectorAll("input:not([type=submit]):not([type=button])" +
             ":not([type=file]):not([type=hidden]):not([type=image]):not([type=reset]):not([type=search])" +
@@ -219,7 +220,8 @@ var DOM_UTILS = (function () {
             //Set inputs without name index
             inputWNameIndex = inputNameStruct.inputWNameIndex;
             //Add struct to result
-            finputs.push(iStruct);
+            if(selectedOnly === undefined || (selectedOnly === true && input.getAttribute('selected') !== null))
+                finputs.push(iStruct);
         }
         return finputs;
     }

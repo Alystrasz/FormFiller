@@ -7,19 +7,18 @@
 - Improved name detections (search of label, etc)
 - File importation (JSON/YAML formatted)
 
-### February 14th
+### Since February 7th, 2018
 - Form template downloading via buttons
 - Interactive selection
     - CSS
     - Individual/multiple selection
     - All inputs are selected by default
+    - Export selected inputs only
 
 **TODO**
 
-- Interactive selection
-  - export selected inputs only
 - Fields autofill
-  - Form detection (with the key stored in json)
-  - Autofill via prototype
+    - Form detection (with the key stored in json)
+    - Autofill via prototype
 - Add non-form fields
 - Interface improvements (CSS rework)
