@@ -107,6 +107,9 @@ function _action_forms_get() {
                     e.stopPropagation();
                     //Refreshing data
                     fields = DOM_UTILS.fields(form, true);
+                    //Downloading all inputs if none is selected
+                    if(fields.length === 0)
+                        fields = DOM_UTILS.fields(form);
                     tModel = DOM_UTILS.fields_model(form, fields);
                     uuid = tModel.uuid;
                     //Launching new model download
