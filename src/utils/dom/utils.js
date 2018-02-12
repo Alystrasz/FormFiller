@@ -220,7 +220,7 @@ var DOM_UTILS = (function () {
             //Set inputs without name index
             inputWNameIndex = inputNameStruct.inputWNameIndex;
             //Add struct to result
-            if(selectedOnly === undefined || (selectedOnly === true && input.getAttribute('selected') !== null))
+            if (selectedOnly === undefined || (selectedOnly === true && input.getAttribute('selected') !== null))
                 finputs.push(iStruct);
         }
         return finputs;
@@ -278,6 +278,26 @@ var DOM_UTILS = (function () {
     }
 
     /**
+     * Set value of given field
+     * @param element
+     * @param type
+     * @param value
+     * @private
+     */
+    function _field_value_set(element, type, value) {
+        var vsetNamespace = 'value';
+        if (type === 'checkbox' || type === 'radio') {
+            vsetNamespace = 'checked';
+        }
+        if (type.split('-')[0].trim() !== 'select')
+            element[vsetNamespace] = value;
+        else {
+            //TODO
+            FormFillerLog.warn('Type : ' + type + ' not supported !');
+        }
+    }
+
+    /**
      * Query node with given xpath
      * @param query
      * @returns {Node}
@@ -304,6 +324,7 @@ var DOM_UTILS = (function () {
         fields: _fields,
         fields_model: _fields_model,
         fields_template: _fields_template,
+        field_value_set: _field_value_set,
         forms: _forms
     }
 

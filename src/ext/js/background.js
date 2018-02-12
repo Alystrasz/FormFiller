@@ -16,9 +16,9 @@ MESSAGE_HANDLER.from('POPUP', function (obj) {
 
     FormFillerLog.info('File received from user.');
     console.log(obj);
-    let result;
-    let status = true;
-    let message = 'File parsed successfully!';
+    var result,
+    status = true,
+    message = 'File parsed successfully!';
 
     //Is this JSON or YAML formatted?
     switch(obj.ext) {

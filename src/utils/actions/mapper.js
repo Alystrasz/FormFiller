@@ -3,8 +3,8 @@ var ACTIONS_MAPPER = (function () {
     //Mapped actions object
     var mappedActions = {};
 
-    function _getActionFunction(actionName) {
-        return mappedActions[actionName];
+    function _getActionFunction(messageStruct) {
+        return mappedActions[messageStruct.action];
     }
 
     function _map(actionName, actionFunction) {
@@ -14,10 +14,10 @@ var ACTIONS_MAPPER = (function () {
         } else return false;
     }
 
-    function _process(actionName){
-        var acFunc = _getActionFunction(actionName);
+    function _process(messageStruct){
+        var acFunc = _getActionFunction(messageStruct);
         if(acFunc){
-            return acFunc.call(null);
+            return acFunc.apply(null, arguments);
         }
         return false;
     }

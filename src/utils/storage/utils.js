@@ -22,19 +22,24 @@ var STORAGE_UTILS = (function () {
 
     /**
      * Stores json object into user browser
-     * @param {String} key name of the data
-     * @param {String} strData string to store
-     * @returns {boolean} whether the storage succeeded or not
+     * @param key key name of the storage
+     * @param strData data to save
+     * @returns {boolean} Store result
      * @private
-     **/
+     */
     function _set(key, strData) {
-        localStorage.setItem(key, strData);
+        try {
+            localStorage.setItem(key, strData);
+        } catch (e) {
+            return false;
+        }
+        return true;
     }
 
     /**
      * Gets json object from user browser
-     * @param {String} key name of the data
-     * @returns {String} string data corresponding to key
+     * @param {String} key name of the storage
+     * @returns {String} string storage corresponding to key
      * @private
      **/
     function _get(key) {
@@ -42,32 +47,12 @@ var STORAGE_UTILS = (function () {
     }
 
     /**
-     * Remove given key data
+     * Remove given key storage
      * @param key
      * @private
      */
     function _remove(key) {
         return localStorage.removeItem(key);
-    }
-
-    /**
-     * Converts a json object to a yaml one
-     * @param {JSON} json object to convert
-     * @returns {YAML} converted object
-     * @private
-     **/
-    function _json_to_yaml(json) {
-
-    }
-
-    /**
-     * Converts a yaml object to a json one
-     * @param {YAML} yaml object to convert
-     * @returns {JSON} converted object
-     * @private
-     **/
-    function _yaml_to_json(yaml) {
-        return jsyaml.load(yaml);
     }
 
     var exports = {
@@ -76,9 +61,6 @@ var STORAGE_UTILS = (function () {
         },
         get: function (key) {
             return _get(key);
-        },
-        yaml_to_json: function(yaml) {
-            return _yaml_to_json(yaml);
         }
     };
 

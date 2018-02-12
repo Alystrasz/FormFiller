@@ -50,9 +50,9 @@ var BROWSER_UTILS = (function (namespace) {
      * @private
      */
     function _message_listen(from, clbk, receiver) {
-        namespace.runtime.onMessage.addListener(function (request, sender) {
+        namespace.runtime.onMessage.addListener(function (request) {
             if (request.from === from && request.receiver === receiver) {
-                clbk(request.content, sender);
+                clbk(request.content);
             }
             return new Promise(function(){});
         });

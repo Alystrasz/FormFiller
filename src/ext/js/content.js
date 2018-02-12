@@ -7,7 +7,8 @@ var MESSAGE_HANDLER = BROWSER_UTILS.MESSAGE.register('CONTENT_SCRIPT');
 //*** ACTIONS MAP***//
 ACTIONS_MAPPER.map('get_forms', _action_forms_get);
 
-MESSAGE_HANDLER.send('BACKGROUND','test')
+//TODO : tmp action + REVIEW ACTION MAPPER !
+ACTIONS_MAPPER.map('fill_form', _action_form_fill);
 
 //From : BACKGROUND
 MESSAGE_HANDLER.from('BACKGROUND', ACTIONS_MAPPER.process);
@@ -16,30 +17,35 @@ MESSAGE_HANDLER.from('BACKGROUND', ACTIONS_MAPPER.process);
 MESSAGE_HANDLER.from('POPUP', ACTIONS_MAPPER.process);
 
 
-//TODO: tmp for demo ( oui c'est fait à l'arrache ;) )
-function _compare(obj1, obj2, changed) {
-    for (var k in obj2) {
-        if (typeof obj2[k] === 'object') {
-            _compare(obj1[k], obj2[k], changed);
-        } else {
-            if (obj1[k] !== obj2[k]) {
-                changed.push({name: k, old: obj1[k], newest: obj2[k]});
-                obj1[k] = obj2[k];
+function _action_form_fill(message) {
+    //Debug
+    console.log(arguments);
+    //Get template
+    var userTemplate = message.userTemplate;
+    if (userTemplate) {
+        //Check associated form
+        var associatedFormModel ;
+        console.log(userTemplate.associatedForm);
+        if (userTemplate.associatedForm && (associatedFormModel = STORAGE_UTILS.get(userTemplate.associatedForm))) {
+            //Form model as object
+            associatedFormModel = JSON.parse(associatedFormModel);
+            //Get fields to fill & user fields
+            var associatedFormFields = associatedFormModel.fields,
+                userFields = userTemplate.data;
+            for(var fieldName in associatedFormFields){
+                //Get current field & user associated data
+                var currentField = associatedFormFields[fieldName],
+                    userFieldData = userFields[fieldName];
+                //DEBUG
+                FormFillerLog.log('Filling ['+fieldName+'] with data => '+ userFieldData);
+                //Fill field with user data
+                DOM_UTILS.field_value_set(DOM_UTILS.fromXPath(currentField.xpath), currentField.type, userFieldData);
             }
+
+        }else{
+            FormFillerLog.error('Form does not exists !');
         }
     }
-}
-
-function _observe(obj, clbk) {
-    var baseVars = JSON.parse(JSON.stringify(obj));
-    setInterval(function () {
-        var changed = [];
-        _compare(baseVars, obj, changed);
-        if (changed.length > 0) {
-            clbk(changed);
-        }
-
-    }, 1E3 / 60);
 }
 
 /**
@@ -61,23 +67,10 @@ function _action_forms_get() {
             console.log('----------------------------------------');
             console.log(JSON.stringify(fModel, null, 2));
 
-
             console.log('----------------------------------------');
             console.log(' FORM USER MODEL');
             console.log('----------------------------------------');
             var userModel = DOM_UTILS.fields_template(fModel);
-            //TODO : FOR DEMO ONLY
-            (function () {
-                var associatedForm = fModel;
-                _observe(userModel, function (t) {
-                    //Changed field
-                    var changedField = t[0],
-                        modelField = associatedForm.fields[changedField.name],
-                        domField = DOM_UTILS.fromXPath(modelField.xpath);
-                    console.log(domField, changedField);
-                    domField.value = changedField.newest;
-                });
-            }());
             console.dir(userModel);
 
 
@@ -85,15 +78,15 @@ function _action_forms_get() {
             forms[i].classList.add('formfiller_mark');
 
             //Adding all inputs selection listener
-            (function() {
+            (function () {
                 var fields = fFields;
-                forms[i].addEventListener('click', function() {
+                forms[i].addEventListener('click', function () {
                     _select_all_inputs(fields);
                 }, false);
             })();
 
             //Prototyping export function
-            (function() {
+            (function () {
                 var uuid = fModel.uuid;
                 var form = forms[i];
                 var fields = DOM_UTILS.fields(form, true);
@@ -103,15 +96,17 @@ function _action_forms_get() {
                 btn.className = 'formfiller_download_btn';
                 btn.innerText = "Download form template";
                 btn.setAttribute('type', 'button');
-                btn.onclick = (e) => {
+                btn.onclick = function (e) {
                     e.stopPropagation();
-                    //Refreshing data
+                    //Refreshing storage
                     fields = DOM_UTILS.fields(form, true);
                     //Downloading all inputs if none is selected
-                    if(fields.length === 0)
+                    if (fields.length === 0)
                         fields = DOM_UTILS.fields(form);
                     tModel = DOM_UTILS.fields_model(form, fields);
                     uuid = tModel.uuid;
+                    //TODO : tmp store form model
+                    STORAGE_UTILS.store(uuid,JSON.stringify(tModel));
                     //Launching new model download
                     var selectionsModel = DOM_UTILS.fields_template(tModel);
                     _launchDownload(uuid, selectionsModel);
@@ -121,17 +116,19 @@ function _action_forms_get() {
             })();
 
             //Adding selection listeners
-            (function() {
+            (function () {
                 var fields = fFields;
 
-                for(var i=0, len=fields.length; i<len; i++) {
-                    let field = fields[i].element;
-                    field.addEventListener('click', function(e) {
-                        _select_input(field);
-                        e.stopPropagation();
-                    }, false);
+                for (var i = 0, len = fields.length; i < len; i++) {
+                    (function () {
+                        var field = fields[i].element;
+                        field.addEventListener('click', function (e) {
+                            _select_input(field);
+                            e.stopPropagation();
+                        }, false);
+                    })();
                 }
-            })()
+            })();
 
 
             //Add fields
@@ -142,16 +139,16 @@ function _action_forms_get() {
     FormFillerLog.log('Found forms >', fmsInputs);
 }
 
-function _launchDownload(formname, obj){
+function _launchDownload(formname, obj) {
     // Setting up the link
     var link = document.createElement("a");
-    link.setAttribute("target","_blank");
-    if(Blob !== undefined) {
+    link.setAttribute("target", "_blank");
+    if (Blob !== undefined) {
         var blob = new Blob([JSON.stringify(obj, null, 2)], {type: "application/json"});
         // type: "application/x-yaml"
         link.setAttribute("href", URL.createObjectURL(blob));
     } else {
-        link.setAttribute("href", "data:text/plain," + encodeURIComponent(text));
+        link.setAttribute("href", "storage:text/plain," + encodeURIComponent(text));
     }
     link.setAttribute("download", formname + '.json');
     // Adding the link
@@ -163,14 +160,14 @@ function _launchDownload(formname, obj){
 
 function _select_input(node) {
     var selected = node.getAttribute('selected');
-    if(selected === null)
+    if (selected === null)
         node.setAttribute('selected', '');
     else
         node.removeAttribute('selected');
 }
 
 function _select_all_inputs(fFields) {
-    for(var i=0, len=fFields.length; i<len; i++) {
+    for (var i = 0, len = fFields.length; i < len; i++) {
         var elem = fFields[i].element;
         _select_input(elem);
     }

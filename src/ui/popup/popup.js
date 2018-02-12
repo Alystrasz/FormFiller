@@ -11,17 +11,23 @@ document.addEventListener('DOMContentLoaded', function () {
 
     //From : BACKGROUND
     MESSAGE_HANDLER.from('BACKGROUND', function (message) {
+        //TODO: handle different actions !!
+        if (message.status) {
+            //Send content script fields to select them
+            MESSAGE_HANDLER.send('CONTENT_SCRIPT', {action: 'fill_form', userTemplate: message.content}, true);
+        }
+        //Debug
         console.log(message);
     });
 
     //Attach action to found form button
     document.getElementById('find_forms').addEventListener('click', function () {
         //Send message to content script (tab context)
-        MESSAGE_HANDLER.send('CONTENT_SCRIPT', 'get_forms', true);
+        MESSAGE_HANDLER.send('CONTENT_SCRIPT', {action:'get_forms'}, true);
     }, false);
 
     //Test function to import files
-    document.getElementById('file').addEventListener('change', () => {
+    document.getElementById('file').addEventListener('change', function () {
         import_json();
     });
 
@@ -34,8 +40,7 @@ document.addEventListener('DOMContentLoaded', function () {
         var current_data = input.files.item(0);
         var content = undefined;
 
-        var file = input.files[0];
-        let reader = new FileReader();
+        var reader = new FileReader();
 
         reader.onload = function () {
             content = (this.result);
