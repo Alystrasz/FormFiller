@@ -23,7 +23,8 @@ MESSAGE_HANDLER.from('POPUP', ACTIONS_MAPPER.process);
 function _selection_mode_start() {
 
     //Get forms
-    var forms = DOM_UTILS.forms(), fnFormsLen = forms.length, fnFormsFields = [];
+    var forms = DOM_UTILS.forms(), formsArray = Array.prototype.slice.call(forms), fnFormsLen = forms.length,
+        fnFormsFields = [];
     for (var i = 0; i < fnFormsLen; ++i) {
 
         //Get form fields
@@ -44,16 +45,15 @@ function _selection_mode_start() {
     }, function (element) {
         FormFillerLog.log('Selected', element);
     }, function (element) {
-        //Check if element is in form fields
-        var inForms = false;
-        for (var f = 0; f < fnFormsLen && !inForms; ++f) {
-            var fields = fnFormsFields[f];
-            for (var fi = 0, filen = fields.length; fi < filen && !inForms; ++fi) {
-                if (fields[fi].element === element) inForms = true;
-            }
+
+        //Check if element is in form
+        for (var f = 0; f < fnFormsLen; ++f) {
+            if (formsArray[f].contains(element)) return formsArray[f];
         }
-        //Filter result
-        return inForms;
+
+        return formsArray[formsArray.indexOf(element)];
+
+
     })
 }
 

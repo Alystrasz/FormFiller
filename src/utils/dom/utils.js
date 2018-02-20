@@ -513,7 +513,7 @@ var DOM_UTILS = (function () {
 
         function _handleMove(e) {
             var hovered = (_elementFromPointDepth(e.clientX, e.clientY, 2));
-            if (hovered && filterFunc(hovered)) {
+            if (hovered && (hovered = filterFunc(hovered))) {
                 if (hovered !== lastHovered) {
                     lastHovered = hovered;
                     _highlight(hovered);
@@ -551,6 +551,7 @@ var DOM_UTILS = (function () {
             targetContainer.removeChild(selectionFrame);
         }
     }
+
 
     return {
         xpath: _xpath,
