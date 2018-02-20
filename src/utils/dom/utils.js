@@ -332,7 +332,7 @@ var DOM_UTILS = (function () {
         depth = depth || 1;
 
         //Check params
-        if(!x || !y) return null;
+        if (!x || !y) return null;
 
         //Init vars
         var elements = [], previousPointerEvents = [], current, i, d, currentDepth = 0;
@@ -367,6 +367,183 @@ var DOM_UTILS = (function () {
         else return null;
     }
 
+    /**
+     * Enter selection mode
+     * @param targetContainer
+     * @param onHover
+     * @param onSelected
+     * @private
+     */
+    function _selection_mode_enable(targetContainer, onHover, onSelected) {
+
+        //Check if frame already exists
+        if (document.getElementById('ff-selection-mode-frame'))
+            return false;
+
+        //Create frame overlay
+        var selectionFrame = document.createElement('iframe');
+        selectionFrame.id = 'ff-selection-mode-frame';
+        selectionFrame.className = 'ff-overlay';
+        targetContainer.appendChild(selectionFrame);
+
+        //Get doc & body
+        var
+            fDoc = selectionFrame.contentWindow.document,
+            fHead = fDoc.head,
+            fBody = fDoc.body,
+            fStyle = fDoc.createElement('style');
+
+        //Set style
+        // noinspection JSAnnotator
+        fStyle.innerHTML = `
+    html,body{
+        margin:0;
+        padding:0;
+        width: 100%;
+        height: 100%;
+        background: transparent !important;
+    }
+    
+    body{
+        overflow: hidden;
+    }
+    
+    svg {
+        position: fixed;
+        top: 0;
+        left: 0;
+        cursor: crosshair !important;
+        width: 100%;
+        height: 100%;
+    }
+    
+    svg > path:first-child {
+        fill: rgba(0,0,0,0.5);
+        fill-rule: evenodd;
+    }
+    
+    svg > path + path {
+        stroke: #F00;
+        stroke-width: 0.5px;
+        fill: rgba(255,63,63,0.20);
+    }
+    
+    `;
+        fHead.appendChild(fStyle);
+
+        //Init svg namespace
+        var svgnps = 'http://www.w3.org/2000/svg',
+            //Set selection overlay (SVG)
+            selectionOverlay = fDoc.createElementNS(svgnps, 'svg'),
+            //Set paths
+            p1 = fDoc.createElementNS(svgnps, 'path'),
+            p2 = fDoc.createElementNS(svgnps, 'path');
+
+        //Append paths
+        selectionOverlay.appendChild(p1);
+        selectionOverlay.appendChild(p2);
+
+        //Append svg container
+        fBody.appendChild(selectionOverlay);
+
+
+        /**
+         * Get associated poly path of given coords
+         * @param x
+         * @param y
+         * @param w
+         * @param h
+         * @returns {string}
+         * @private
+         */
+        function _poly(x, y, w, h) {
+            var ws = w.toFixed(1);
+            return 'M' + x.toFixed(1) + ' ' + y.toFixed(1) +
+                'h' + ws +
+                'v' + h.toFixed(1) +
+                'h-' + ws +
+                'z';
+        }
+
+        //Get window dimensions
+        var ow = selectionFrame.contentWindow.innerWidth;
+        var oh = selectionFrame.contentWindow.innerHeight;
+
+        //Init background overlay path
+        var baseBackgroundOverlayPath = _poly(0, 0, ow, oh);
+        p1.setAttribute('d', baseBackgroundOverlayPath);
+
+        /**
+         * Highlight given element
+         * @param element
+         * @private
+         */
+        function _highlight(element) {
+            //Init background overlay poly path
+            var bgOverlayPoly = [
+                'M0 0',
+                'h', ow,
+                'v', oh,
+                'h-', ow,
+                'z'
+            ];
+            //Get element position
+            var pos = element.getBoundingClientRect(),
+                //Get poly of pos
+                poly = _poly(pos.left, pos.top, pos.width, pos.height);
+            //Append poly path to overlay
+            bgOverlayPoly.push(poly);
+            //Set background overlay path
+            p1.setAttribute('d', bgOverlayPoly.join(''));
+            //Set highlight path
+            p2.setAttribute('d', poly);
+        }
+
+       /** HANDLERS **/
+
+        var lastHovered = null;
+
+        function _handleMove(e) {
+            var hovered = (_elementFromPointDepth(e.clientX, e.clientY, 2));
+            if (hovered) {
+                if (hovered !== lastHovered) {
+                    lastHovered = hovered;
+                    _highlight(hovered);
+                    onHover(hovered);
+                }
+            } else {
+                lastHovered = null;
+                p1.setAttribute('d', baseBackgroundOverlayPath);
+                p2.setAttribute('d', '');
+            }
+        }
+
+        function _handleClick(e) {
+            if (lastHovered) {
+                onSelected(lastHovered);
+            }
+        }
+
+        //Set events
+        fDoc.addEventListener('mousemove', _handleMove);
+        fDoc.addEventListener('click', _handleClick);
+
+    }
+
+    /**
+     * Disable selection mode
+     * @param targetContainer
+     * @private
+     */
+    function _selection_mode_disable(targetContainer) {
+        //Get frame
+        var selectionFrame = document.getElementById('ff-selection-mode-frame');
+        if (selectionFrame) {
+            //Delete it
+            targetContainer.removeChild(selectionFrame);
+        }
+    }
+
     return {
         xpath: _xpath,
         fromXPath: _xpathQuery,
@@ -375,7 +552,8 @@ var DOM_UTILS = (function () {
         fields_template: _fields_template,
         field_value_set: _field_value_set,
         forms: _forms,
-        elementFromPointDepth: _elementFromPointDepth
+        selection_mode: _selection_mode_enable,
+        selection_mode_end: _selection_mode_disable
     }
 
 }());
