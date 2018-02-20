@@ -6,15 +6,172 @@ var MESSAGE_HANDLER = BROWSER_UTILS.MESSAGE.register('CONTENT_SCRIPT');
 
 //*** ACTIONS MAP***//
 ACTIONS_MAPPER.map('get_forms', _action_forms_get);
-
-//TODO : tmp action + REVIEW ACTION MAPPER !
 ACTIONS_MAPPER.map('fill_form', _action_form_fill);
+ACTIONS_MAPPER.map('selection_mode', _selection_mode_start);
 
 //From : BACKGROUND
 MESSAGE_HANDLER.from('BACKGROUND', ACTIONS_MAPPER.process);
 
 //From : POPUP
 MESSAGE_HANDLER.from('POPUP', ACTIONS_MAPPER.process);
+
+
+/**
+ * ACTION : selection mode
+ * @private
+ */
+function _selection_mode_start() {
+
+    //Create frame overlay
+    var selectionIframe = document.createElement('iframe');
+    selectionIframe.className = 'ff-overlay';
+    document.body.appendChild(selectionIframe);
+    //Get doc & body
+    var
+        fDoc = selectionIframe.contentWindow.document,
+        fHead = fDoc.head,
+        fBody = fDoc.body,
+        fStyle = fDoc.createElement('style');
+    //Set style
+    // noinspection JSAnnotator
+    fStyle.innerHTML = `
+    html,body{
+        margin:0;
+        padding:0;
+        width: 100%;
+        height: 100%;
+        background: transparent !important;
+    }
+    
+    body{
+        overflow: hidden;
+    }
+    
+    svg {
+        position: fixed;
+        top: 0;
+        left: 0;
+        cursor: crosshair !important;
+        width: 100%;
+        height: 100%;
+    }
+    
+    svg > path:first-child {
+        fill: rgba(0,0,0,0.5);
+        fill-rule: evenodd;
+    }
+    
+    svg > path + path {
+        stroke: #F00;
+        stroke-width: 0.5px;
+        fill: rgba(255,63,63,0.20);
+    }
+    
+    `;
+    fHead.appendChild(fStyle);
+
+    //Init svg namespace
+    var svgnps = 'http://www.w3.org/2000/svg',
+        //Set selection overlay (SVG)
+        selectionOverlay = fDoc.createElementNS(svgnps, 'svg'),
+        //Set paths
+        p1 = fDoc.createElementNS(svgnps, 'path'),
+        p2 = fDoc.createElementNS(svgnps, 'path');
+
+    //Append paths
+    selectionOverlay.appendChild(p1);
+    selectionOverlay.appendChild(p2);
+
+    //Append svg container
+    fBody.appendChild(selectionOverlay);
+
+
+    /**
+     * Get associated poly path of given coords
+     * @param x
+     * @param y
+     * @param w
+     * @param h
+     * @returns {string}
+     * @private
+     */
+    function _poly(x, y, w, h) {
+        var ws = w.toFixed(1);
+        return 'M' + x.toFixed(1) + ' ' + y.toFixed(1) +
+            'h' + ws +
+            'v' + h.toFixed(1) +
+            'h-' + ws +
+            'z';
+    }
+
+    //Get window dimensions
+    var ow = selectionIframe.contentWindow.innerWidth;
+    var oh = selectionIframe.contentWindow.innerHeight;
+
+    //Init background overlay path
+    var baseBackgroundOverlayPath = _poly(0, 0, ow, oh);
+    p1.setAttribute('d', baseBackgroundOverlayPath);
+
+    /**
+     * Highlight given element
+     * @param element
+     * @private
+     */
+    function _highlight(element) {
+        //Init background overlay poly path
+        var bgOverlayPoly = [
+            'M0 0',
+            'h', ow,
+            'v', oh,
+            'h-', ow,
+            'z'
+        ];
+        //Get element position
+        var pos = element.getBoundingClientRect(),
+            //Get poly of pos
+            poly = _poly(pos.left, pos.top, pos.width, pos.height);
+        //Append poly path to overlay
+        bgOverlayPoly.push(poly);
+        //Set background overlay path
+        p1.setAttribute('d', bgOverlayPoly.join(''));
+        //Set highlight path
+        p2.setAttribute('d', poly);
+    }
+
+
+    //Handler
+    var prev = null;
+    function _handleMouse(e){
+        var hovered = (DOM_UTILS.elementFromPointDepth(e.clientX, e.clientY, 2));
+        if (hovered) {
+            if (hovered !== prev) {
+                console.log(hovered);
+                prev = hovered;
+                _highlight(hovered);
+            }
+        } else {
+            prev = null;
+            p1.setAttribute('d', baseBackgroundOverlayPath);
+            p2.setAttribute('d', '');
+        }
+    }
+
+    //Set events
+    fDoc.addEventListener('mousemove', _handleMouse);
+    window.addEventListener('scroll', _handleMouse);
+
+    //Set cursor
+    document.body.style.cursor = 'crosshair !important';
+
+}
+
+/**
+ * Undo selection mode
+ * @private
+ */
+function _selection_mode_end() {
+
+}
 
 
 function _action_form_fill(message) {
@@ -24,7 +181,7 @@ function _action_form_fill(message) {
     var userTemplate = message.userTemplate;
     if (userTemplate) {
         //Check associated form
-        var associatedFormModel ;
+        var associatedFormModel;
         console.log(userTemplate.associatedForm);
         if (userTemplate.associatedForm && (associatedFormModel = STORAGE_UTILS.get(userTemplate.associatedForm))) {
             //Form model as object
@@ -32,17 +189,17 @@ function _action_form_fill(message) {
             //Get fields to fill & user fields
             var associatedFormFields = associatedFormModel.fields,
                 userFields = userTemplate.data;
-            for(var fieldName in associatedFormFields){
+            for (var fieldName in associatedFormFields) {
                 //Get current field & user associated data
                 var currentField = associatedFormFields[fieldName],
                     userFieldData = userFields[fieldName];
                 //DEBUG
-                FormFillerLog.log('Filling ['+fieldName+'] with data => '+ userFieldData);
+                FormFillerLog.log('Filling [' + fieldName + '] with data => ' + userFieldData);
                 //Fill field with user data
                 DOM_UTILS.field_value_set(DOM_UTILS.fromXPath(currentField.xpath), currentField.type, userFieldData);
             }
 
-        }else{
+        } else {
             FormFillerLog.error('Form does not exists !');
         }
     }
@@ -106,7 +263,7 @@ function _action_forms_get() {
                     tModel = DOM_UTILS.fields_model(form, fields);
                     uuid = tModel.uuid;
                     //TODO : tmp store form model
-                    STORAGE_UTILS.store(uuid,JSON.stringify(tModel));
+                    STORAGE_UTILS.store(uuid, JSON.stringify(tModel));
                     //Launching new model download
                     var selectionsModel = DOM_UTILS.fields_template(tModel);
                     _launchDownload(uuid, selectionsModel);

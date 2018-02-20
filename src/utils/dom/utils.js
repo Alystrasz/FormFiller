@@ -318,6 +318,55 @@ var DOM_UTILS = (function () {
         return (parentNodeOpt || document).querySelectorAll('form');
     }
 
+
+    /**
+     * Get element at given position and depth
+     * @param x
+     * @param y
+     * @param depth
+     * @returns {*}
+     * @private
+     */
+    function _elementFromPointDepth(x, y, depth) {
+        //Depth default
+        depth = depth || 1;
+
+        //Check params
+        if(!x || !y) return null;
+
+        //Init vars
+        var elements = [], previousPointerEvents = [], current, i, d, currentDepth = 0;
+
+        //For each element at this point
+        while ((current = document.elementFromPoint(x, y)) && currentDepth < depth) {
+
+            // Push element
+            elements.push(current);
+            //Push element pointer event
+            previousPointerEvents.push({
+                value: current.style.getPropertyValue('pointer-events'),
+                priority: current.style.getPropertyPriority('pointer-events')
+            });
+
+            // Add "pointer-events: none", to get to the underlying element
+            current.style.setProperty('pointer-events', 'none', 'important');
+
+            //Depth keep going
+            currentDepth++;
+        }
+
+        // Restore the previous pointer-events values
+        for (i = previousPointerEvents.length; d = previousPointerEvents[--i];) {
+            elements[i].style.setProperty('pointer-events', d.value ? d.value : '', d.priority);
+        }
+
+        //Return depth element
+        var dElem = elements[depth - 1];
+        if (dElem.tagName !== 'BODY' &&
+            dElem.tagName !== 'HTML') return dElem;
+        else return null;
+    }
+
     return {
         xpath: _xpath,
         fromXPath: _xpathQuery,
@@ -325,7 +374,8 @@ var DOM_UTILS = (function () {
         fields_model: _fields_model,
         fields_template: _fields_template,
         field_value_set: _field_value_set,
-        forms: _forms
+        forms: _forms,
+        elementFromPointDepth: _elementFromPointDepth
     }
 
 }());

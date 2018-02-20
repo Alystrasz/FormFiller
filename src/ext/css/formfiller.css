@@ -2,9 +2,9 @@
     border: 3px dashed #ff6352 !important;
 }
 
-.formfiller_mark:hover{
+.formfiller_mark:hover {
     cursor: pointer !important;
-    background: rgba(255,0,0,0.2);
+    background: rgba(255, 0, 0, 0.2);
 }
 
 .formfiller_mark .formfiller_download_btn {
@@ -18,6 +18,28 @@
 }
 
 .formfiller_mark [selected] {
-    background-color: rgba(255,140,0,0.2) !important;
+    background-color: rgba(255, 140, 0, 0.2) !important;
     border: 2px solid DarkOrange !important;
 }
+
+.ff-overlay {
+    background: transparent !important;
+    border: 0px !important;
+    border-radius: 0px !important;
+    box-shadow: none !important;
+    display: block !important;
+    height: 100% !important;
+    left: 0px !important;
+    margin: 0px !important;
+    max-height: none !important;
+    max-width: none !important;
+    opacity: 1 !important;
+    outline: 0px !important;
+    padding: 0px !important;
+    position: fixed !important;
+    top: 0px !important;
+    visibility: visible !important;
+    width: 100% !important;
+    z-index: 2147483647 !important;
+}
+

@@ -20,6 +20,13 @@ document.addEventListener('DOMContentLoaded', function () {
         console.log(message);
     });
 
+
+    //Interactive selection
+    document.getElementById('select_start').addEventListener('click', function(){
+       //Send message to content script => entering selection mode
+       MESSAGE_HANDLER.send('CONTENT_SCRIPT', {action: 'selection_mode'}, true);
+    });
+
     //Attach action to found form button
     document.getElementById('find_forms').addEventListener('click', function () {
         //Send message to content script (tab context)
