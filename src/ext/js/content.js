@@ -15,6 +15,25 @@ MESSAGE_HANDLER.from('BACKGROUND', ACTIONS_MAPPER.process);
 //From : POPUP
 MESSAGE_HANDLER.from('POPUP', ACTIONS_MAPPER.process);
 
+//TODO : structure
+function _launchDownload(formname, obj) {
+    // Setting up the link
+    var link = document.createElement("a");
+    link.setAttribute("target", "_blank");
+    if (Blob !== undefined) {
+        var blob = new Blob([JSON.stringify(obj, null, 2)], {type: "application/json"});
+        // type: "application/x-yaml"
+        link.setAttribute("href", URL.createObjectURL(blob));
+    } else {
+        link.setAttribute("href", "storage:text/plain," + encodeURIComponent(text));
+    }
+    link.setAttribute("download", formname + '.json');
+    // Adding the link
+    document.body.appendChild(link);
+    link.click();
+    // Removing the link
+    document.body.removeChild(link);
+}
 
 /**
  * ACTION : selection mode
@@ -45,31 +64,87 @@ function _selection_mode_start() {
     }, function (element) {
         FormFillerLog.log('Selected', element);
 
+        //Undo select mode
+        DOM_UTILS.selection_mode_end(document.body);
+
         //Retrieve associated form fields
         var associatedFieldsModel = fnFormsFields[formsArray.indexOf(element)];
 
+        //If found
         if(associatedFieldsModel){
             console.dir(associatedFieldsModel);
-            //TODO : Application model dans LOCAL_STORAGE (STORAGE_UTILS)
-            //TODO : User model en download
-            var fieldsModel = DOM_UTILS.fields_model(element, associatedFieldsModel);
-            console.log('Application model',fieldsModel);
-            console.log('User model',DOM_UTILS.fields_template(fieldsModel));
+
+            //Get model & user template
+            var fieldsModel = DOM_UTILS.fields_model(element, associatedFieldsModel),
+                fieldsTemplate = DOM_UTILS.fields_template(fieldsModel);
+
+            console.log('Application model', fieldsModel);
+            console.log('User model', fieldsTemplate);
+
+            //Show popup
+            var fOverlay = document.createElement('div'),
+                fPopup = document.createElement('div');
+            fOverlay.className = 'ff-popup-overlay';
+            fPopup.className = 'ff-popup';
+            fPopup.innerHTML = '<h3>Veuillez choisir les champs à exporter</h3>';
+            for(var name in fieldsModel.fields){
+                //Display field as checkbox
+                var
+                    fExport = document.createElement('div'),
+                    label = document.createElement('label'),
+                    checkbox = document.createElement('input');
+
+               checkbox.value = name;
+               checkbox.type = 'checkbox';
+               label.innerText = name;
+               label.insertBefore(checkbox, label.firstChild);
+
+               fExport.appendChild(label);
+
+                //Add it to popup
+               fPopup.appendChild(fExport);
+
+            }
+            //Space
+            fPopup.innerHTML+='<br/><br/>';
+
+
+            //Export button
+            var exportButton = document.createElement('button');
+            exportButton.innerHTML = 'Exporter';
+            fPopup.appendChild(exportButton);
+
+            exportButton.addEventListener('click', function(){
+                //Filter with checked
+                var filteredInputs = (fPopup.querySelectorAll('input[type="checkbox"]:checked'));
+                //Replace user template data
+                fieldsTemplate.data = {};
+                for(var i = 0, ilen = filteredInputs.length; i < ilen; ++i)
+                    fieldsTemplate.data[filteredInputs[i].value] = '';
+                //TODO : tmp store form model
+                 STORAGE_UTILS.store(fieldsModel.uuid, JSON.stringify(fieldsTemplate));
+                 //Download it
+                _launchDownload(fieldsModel.uuid, fieldsTemplate);
+                //Remove popup
+                document.body.removeChild(fOverlay);
+            });
+
+            //Append to body
+            fOverlay.appendChild(fPopup);
+            document.body.appendChild(fOverlay);
+
+
         }else{
             FormFillerLog.error('No associated fields found');
         }
 
 
     }, function (element) {
-
         //Check if element is in form
-        for (var f = 0; f < fnFormsLen; ++f) {
+        for (var f = 0; f < fnFormsLen; ++f)
             if (formsArray[f].contains(element)) return formsArray[f];
-        }
-
         return formsArray[formsArray.indexOf(element)];
-
-    })
+    });
 }
 
 /**
@@ -204,36 +279,5 @@ function _action_forms_get() {
     FormFillerLog.log('Found forms >', fmsInputs);
 }
 
-function _launchDownload(formname, obj) {
-    // Setting up the link
-    var link = document.createElement("a");
-    link.setAttribute("target", "_blank");
-    if (Blob !== undefined) {
-        var blob = new Blob([JSON.stringify(obj, null, 2)], {type: "application/json"});
-        // type: "application/x-yaml"
-        link.setAttribute("href", URL.createObjectURL(blob));
-    } else {
-        link.setAttribute("href", "storage:text/plain," + encodeURIComponent(text));
-    }
-    link.setAttribute("download", formname + '.json');
-    // Adding the link
-    document.body.appendChild(link);
-    link.click();
-    // Removing the link
-    document.body.removeChild(link);
-}
 
-function _select_input(node) {
-    var selected = node.getAttribute('selected');
-    if (selected === null)
-        node.setAttribute('selected', '');
-    else
-        node.removeAttribute('selected');
-}
 
-function _select_all_inputs(fFields) {
-    for (var i = 0, len = fFields.length; i < len; i++) {
-        var elem = fFields[i].element;
-        _select_input(elem);
-    }
-}
