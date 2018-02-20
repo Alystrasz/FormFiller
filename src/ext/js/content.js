@@ -44,6 +44,22 @@ function _selection_mode_start() {
         FormFillerLog.log('Hovered', element);
     }, function (element) {
         FormFillerLog.log('Selected', element);
+
+        //Retrieve associated form fields
+        var associatedFieldsModel = fnFormsFields[formsArray.indexOf(element)];
+
+        if(associatedFieldsModel){
+            console.dir(associatedFieldsModel);
+            //TODO : Application model dans LOCAL_STORAGE (STORAGE_UTILS)
+            //TODO : User model en download
+            var fieldsModel = DOM_UTILS.fields_model(element, associatedFieldsModel);
+            console.log('Application model',fieldsModel);
+            console.log('User model',DOM_UTILS.fields_template(fieldsModel));
+        }else{
+            FormFillerLog.error('No associated fields found');
+        }
+
+
     }, function (element) {
 
         //Check if element is in form
@@ -52,7 +68,6 @@ function _selection_mode_start() {
         }
 
         return formsArray[formsArray.indexOf(element)];
-
 
     })
 }
