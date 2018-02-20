@@ -362,7 +362,7 @@ var DOM_UTILS = (function () {
 
         //Return depth element
         var dElem = elements[depth - 1];
-        if (dElem.tagName !== 'BODY' &&
+        if (dElem && dElem.tagName !== 'BODY' &&
             dElem.tagName !== 'HTML') return dElem;
         else return null;
     }
