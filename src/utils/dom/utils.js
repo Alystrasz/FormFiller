@@ -426,14 +426,14 @@ var DOM_UTILS = (function () {
     }
     
     svg > path:first-child {
-        fill: rgba(0,0,0,0.5);
+        fill: rgba(0,0,0,0);
         fill-rule: evenodd;
     }
     
     svg > path + path {
         stroke: #F00;
         stroke-width: 0.5px;
-        fill: rgba(255,63,63,0.20);
+        fill: rgba(255,63,63,0.5);
     }
     
     `;
