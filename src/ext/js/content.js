@@ -22,11 +22,39 @@ MESSAGE_HANDLER.from('POPUP', ACTIONS_MAPPER.process);
  */
 function _selection_mode_start() {
 
-   DOM_UTILS.selection_mode(document.body, function(element){
-       FormFillerLog.log('Hovered', element);
-   }, function(element){
-       FormFillerLog.log('Selected', element);
-   })
+    //Get forms
+    var forms = DOM_UTILS.forms(), fnFormsLen = forms.length, fnFormsFields = [];
+    for (var i = 0; i < fnFormsLen; ++i) {
+
+        //Get form fields
+        var fFields = DOM_UTILS.fields(forms[i]);
+        //Check eligibility
+        if (fFields.length > 0) {
+            //Apply form class mark
+            forms[i].classList.add('formfiller_mark');
+            //Add fields to fields array
+            fnFormsFields.push(fFields);
+        }
+    }
+
+
+    //Enable selection mode
+    DOM_UTILS.selection_mode(document.body, function (element) {
+        FormFillerLog.log('Hovered', element);
+    }, function (element) {
+        FormFillerLog.log('Selected', element);
+    }, function (element) {
+        //Check if element is in form fields
+        var inForms = false;
+        for (var f = 0; f < fnFormsLen && !inForms; ++f) {
+            var fields = fnFormsFields[f];
+            for (var fi = 0, filen = fields.length; fi < filen && !inForms; ++fi) {
+                if (fields[fi].element === element) inForms = true;
+            }
+        }
+        //Filter result
+        return inForms;
+    })
 }
 
 /**
@@ -34,7 +62,8 @@ function _selection_mode_start() {
  * @private
  */
 function _selection_mode_end() {
-
+    //Disable selection mode
+    DOM_UTILS.selection_mode_end(document.body);
 }
 
 

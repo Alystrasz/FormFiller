@@ -372,13 +372,21 @@ var DOM_UTILS = (function () {
      * @param targetContainer
      * @param onHover
      * @param onSelected
+     * @param filterFunc
      * @private
      */
-    function _selection_mode_enable(targetContainer, onHover, onSelected) {
+    function _selection_mode_enable(targetContainer, onHover, onSelected, filterFunc) {
 
         //Check if frame already exists
         if (document.getElementById('ff-selection-mode-frame'))
             return false;
+
+        //Default filter
+        if (!filterFunc) {
+            filterFunc = function () {
+                return true;
+            }
+        }
 
         //Create frame overlay
         var selectionFrame = document.createElement('iframe');
@@ -499,13 +507,13 @@ var DOM_UTILS = (function () {
             p2.setAttribute('d', poly);
         }
 
-       /** HANDLERS **/
+        /** HANDLERS **/
 
         var lastHovered = null;
 
         function _handleMove(e) {
             var hovered = (_elementFromPointDepth(e.clientX, e.clientY, 2));
-            if (hovered) {
+            if (hovered && filterFunc(hovered)) {
                 if (hovered !== lastHovered) {
                     lastHovered = hovered;
                     _highlight(hovered);
@@ -518,7 +526,7 @@ var DOM_UTILS = (function () {
             }
         }
 
-        function _handleClick(e) {
+        function _handleClick() {
             if (lastHovered) {
                 onSelected(lastHovered);
             }
