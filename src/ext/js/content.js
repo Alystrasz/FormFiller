@@ -122,7 +122,7 @@ function _selection_mode_start() {
                 for(var i = 0, ilen = filteredInputs.length; i < ilen; ++i)
                     fieldsTemplate.data[filteredInputs[i].value] = '';
                 //TODO : tmp store form model
-                 STORAGE_UTILS.store(fieldsModel.uuid, JSON.stringify(fieldsTemplate));
+                 STORAGE_UTILS.store(fieldsModel.uuid, JSON.stringify(fieldsModel));
                  //Download it
                 _launchDownload(fieldsModel.uuid, fieldsTemplate);
                 //Remove popup
