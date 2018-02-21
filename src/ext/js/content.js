@@ -74,6 +74,7 @@ function _launchDownload(formname, obj) {
         };
         reader.readAsText(current_data);
     });
+    file.style.display = 'none';
     file.accept = '.json,.yaml';
     file.id = 'file-import-dialog';
     document.body.appendChild(file);
