@@ -536,6 +536,9 @@ var DOM_UTILS = (function () {
         fDoc.addEventListener('mousemove', _handleMove);
         fDoc.addEventListener('click', _handleClick);
 
+        window.ffSelectionModeHandler = _handleMove;
+        window.addEventListener('scroll', _handleMove);
+
     }
 
     /**
@@ -547,6 +550,9 @@ var DOM_UTILS = (function () {
         //Get frame
         var selectionFrame = document.getElementById('ff-selection-mode-frame');
         if (selectionFrame) {
+            //Delete events
+            window.removeEventListener('scroll', window.ffSelectionModeHandler);
+            delete window.ffSelectionModeHandler;
             //Delete it
             targetContainer.removeChild(selectionFrame);
         }
