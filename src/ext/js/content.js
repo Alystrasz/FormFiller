@@ -6,7 +6,7 @@ var MESSAGE_HANDLER = BROWSER_UTILS.MESSAGE.register('CONTENT_SCRIPT');
 
 //*** ACTIONS MAP***//
 ACTIONS_MAPPER.map('get_forms', _action_forms_get);
-ACTIONS_MAPPER.map('fill_form', _action_form_fill);
+ACTIONS_MAPPER.map('import_template', _action_template_import);
 ACTIONS_MAPPER.map('selection_mode', _selection_mode_start);
 
 //From : BACKGROUND
@@ -33,6 +33,59 @@ function _launchDownload(formname, obj) {
     link.click();
     // Removing the link
     document.body.removeChild(link);
+}
+
+//TODO : structure
+(function () {
+    var file = document.createElement('input');
+    file.type = 'file';
+    file.addEventListener('change', function (e) {
+        var current_data = e.target.files[0],
+            reader = new FileReader();
+        reader.onload = function () {
+
+            //Init result
+            var result = {};
+            //Get content & ext
+            var content = this.result,
+                ext = current_data.name.split('.').pop();
+            //Is this JSON or YAML formatted?
+            switch (ext) {
+                case 'json':
+                    try {
+                        result = JSON.parse(content);
+                    } catch (e) {
+                        FormFillerLog.error('Parse error');
+                    }
+                    break;
+                case 'yaml':
+                    try {
+                        result = jsyaml.load(content);
+                    } catch (e) {
+                        FormFillerLog.error('Parse error');
+                    }
+                    break;
+                default:
+                    FormFillerLog.error('Parse error => ext not supported');
+            }
+
+            _form_fill(result);
+
+        };
+        reader.readAsText(current_data);
+    });
+    file.accept = 'application/json';
+    file.id = 'file-import-dialog';
+    document.body.appendChild(file);
+})();
+
+/**
+ * ACTION : import file
+ * @private
+ */
+function _action_template_import() {
+    //Click on file dialog
+    document.getElementById('file-import-dialog').click();
 }
 
 /**
@@ -71,7 +124,7 @@ function _selection_mode_start() {
         var associatedFieldsModel = fnFormsFields[formsArray.indexOf(element)];
 
         //If found
-        if(associatedFieldsModel){
+        if (associatedFieldsModel) {
             console.dir(associatedFieldsModel);
 
             //Get model & user template
@@ -87,26 +140,26 @@ function _selection_mode_start() {
             fOverlay.className = 'ff-popup-overlay';
             fPopup.className = 'ff-popup';
             fPopup.innerHTML = '<h3>Veuillez choisir les champs à exporter</h3>';
-            for(var name in fieldsModel.fields){
+            for (var name in fieldsModel.fields) {
                 //Display field as checkbox
                 var
                     fExport = document.createElement('div'),
                     label = document.createElement('label'),
                     checkbox = document.createElement('input');
 
-               checkbox.value = name;
-               checkbox.type = 'checkbox';
-               label.innerText = name;
-               label.insertBefore(checkbox, label.firstChild);
+                checkbox.value = name;
+                checkbox.type = 'checkbox';
+                label.innerText = name;
+                label.insertBefore(checkbox, label.firstChild);
 
-               fExport.appendChild(label);
+                fExport.appendChild(label);
 
                 //Add it to popup
-               fPopup.appendChild(fExport);
+                fPopup.appendChild(fExport);
 
             }
             //Space
-            fPopup.innerHTML+='<br/><br/>';
+            fPopup.innerHTML += '<br/><br/>';
 
 
             //Export button
@@ -114,16 +167,16 @@ function _selection_mode_start() {
             exportButton.innerHTML = 'Exporter';
             fPopup.appendChild(exportButton);
 
-            exportButton.addEventListener('click', function(){
+            exportButton.addEventListener('click', function () {
                 //Filter with checked
                 var filteredInputs = (fPopup.querySelectorAll('input[type="checkbox"]:checked'));
                 //Replace user template data
                 fieldsTemplate.data = {};
-                for(var i = 0, ilen = filteredInputs.length; i < ilen; ++i)
+                for (var i = 0, ilen = filteredInputs.length; i < ilen; ++i)
                     fieldsTemplate.data[filteredInputs[i].value] = '';
                 //TODO : tmp store form model
-                 STORAGE_UTILS.store(fieldsModel.uuid, JSON.stringify(fieldsModel));
-                 //Download it
+                STORAGE_UTILS.store(fieldsModel.uuid, JSON.stringify(fieldsModel));
+                //Download it
                 _launchDownload(fieldsModel.uuid, fieldsTemplate);
                 //Remove popup
                 document.body.removeChild(fOverlay);
@@ -134,7 +187,7 @@ function _selection_mode_start() {
             document.body.appendChild(fOverlay);
 
 
-        }else{
+        } else {
             FormFillerLog.error('No associated fields found');
         }
 
@@ -156,12 +209,9 @@ function _selection_mode_end() {
     DOM_UTILS.selection_mode_end(document.body);
 }
 
-
-function _action_form_fill(message) {
-    //Debug
-    console.log(arguments);
+//TODO : structure
+function _form_fill(userTemplate) {
     //Get template
-    var userTemplate = message.userTemplate;
     if (userTemplate) {
         //Check associated form
         var associatedFormModel;
