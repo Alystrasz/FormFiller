@@ -14,10 +14,11 @@
   ],
   "background": {
     "scripts": [
+      "src/utils/log/log.js",
       "src/libs/bundled_esprima_yaml_js.js",
       "src/polyfills/browser-polyfill.min.js",
       "src/utils/browser/utils.js",
-      "src/utils/log/log.js",
+      "src/utils/actions/mapper.js",
       "src/ext/js/background.js"
     ]
   },
@@ -27,19 +28,27 @@
         "<all_urls>"
       ],
       "css": [
-        "src/ext/css/formfiller.css"
+        "src/ext/css/formfiller.css",
+        "src/ext/css/layouts.css"
       ],
       "js": [
+        "src/utils/log/log.js",
         "src/polyfills/browser-polyfill.min.js",
         "src/utils/browser/utils.js",
         "src/utils/dom/utils.js",
-        "src/utils/log/log.js",
-        "src/utils/computing/computing.js",
+        "src/utils/computing/utils.js",
         "src/utils/actions/mapper.js",
         "src/utils/storage/utils.js",
+        "src/utils/parsing/utils.js",
+        "src/utils/io/utils.js",
         "src/ext/js/content.js"
       ],
       "run_at": "document_end"
     }
+  ],
+  "web_accessible_resources": [
+    "src/ext/css/layouts.css",
+    "src/ext/css/frame.css",
+    "src/ext/css/selection.css"
   ]
 }

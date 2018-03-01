@@ -14,17 +14,22 @@ var ACTIONS_MAPPER = (function () {
         } else return false;
     }
 
-    function _process(messageStruct){
+    function _process(messageStruct) {
         var acFunc = _getActionFunction(messageStruct);
-        if(acFunc){
-            return acFunc.apply(null, arguments);
+        if (acFunc) {
+            return acFunc.apply(null, messageStruct.arguments);
         }
         return false;
+    }
+
+    function _build(actionName, arguments) {
+        return {action: actionName, arguments: arguments}
     }
 
 
     return {
         map: _map,
+        build: _build,
         process: _process
     }
 

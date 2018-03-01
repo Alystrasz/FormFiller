@@ -186,11 +186,10 @@ var DOM_UTILS = (function () {
     /**
      * Return found fields of a given node
      * @param node
-     * @param {Boolean} selectedOnly whether to return selected fields only or not
      * @returns {Array}
      * @private
      */
-    function _fields(node, selectedOnly) {
+    function _fields(node) {
         //Get inputs & selects (as array)
         var inputs = Array.prototype.slice.call(node.querySelectorAll("input:not([type=submit]):not([type=button])" +
             ":not([type=file]):not([type=hidden]):not([type=image]):not([type=reset]):not([type=search])" +
@@ -220,8 +219,7 @@ var DOM_UTILS = (function () {
             //Set inputs without name index
             inputWNameIndex = inputNameStruct.inputWNameIndex;
             //Add struct to result
-            if (selectedOnly === undefined || (selectedOnly === true && input.getAttribute('selected') !== null))
-                finputs.push(iStruct);
+            finputs.push(iStruct);
         }
         return finputs;
     }
@@ -309,13 +307,33 @@ var DOM_UTILS = (function () {
     }
 
     /**
-     * Get forms of given parent node or default
+     * Get forms & mark if wanted
+     * @param mark
      * @param parentNodeOpt
-     * @returns {NodeListOf<ElementTagNameMap["form"]>}
+     * @returns {Array}
      * @private
      */
-    function _forms(parentNodeOpt) {
-        return (parentNodeOpt || document).querySelectorAll('form');
+    function _forms(mark, parentNodeOpt) {
+        var forms = (parentNodeOpt || document).querySelectorAll('form'),
+            fForms = [];
+        for (var f = 0, flen = forms.length; f < flen; ++f) {
+            //Get current form
+            var cForm = forms[f],
+                //Get form fields
+                fFields = DOM_UTILS.fields(cForm);
+            //Check eligibility
+            if (fFields.length > 0) {
+                //Apply form class mark
+                if (mark) cForm.classList.add('ff-mark');
+                else if (mark === false) cForm.classList.remove('ff-mark');
+                //Add form to result
+                fForms.push({
+                    form: cForm,
+                    fields: fFields
+                });
+            }
+        }
+        return fForms;
     }
 
 
@@ -369,17 +387,21 @@ var DOM_UTILS = (function () {
 
     /**
      * Enter selection mode
-     * @param targetContainer
+     * @param targetDocument
      * @param onHover
      * @param onSelected
+     * @param onCancel
      * @param filterFunc
      * @private
      */
-    function _selection_mode_enable(targetContainer, onHover, onSelected, filterFunc) {
+    function _selection_mode_enable(targetDocument, onHover, onSelected, onCancel, filterFunc) {
 
         //Check if frame already exists
-        if (document.getElementById('ff-selection-mode-frame'))
+        if (targetDocument.getElementById('ff-selection-mode-frame'))
             return false;
+
+        //Get target container
+        var targetContainer = targetDocument.body;
 
         //Default filter
         if (!filterFunc) {
@@ -389,7 +411,7 @@ var DOM_UTILS = (function () {
         }
 
         //Create frame overlay
-        var selectionFrame = document.createElement('iframe');
+        var selectionFrame = targetDocument.createElement('iframe');
         selectionFrame.id = 'ff-selection-mode-frame';
         selectionFrame.className = 'ff-overlay';
         targetContainer.appendChild(selectionFrame);
@@ -399,44 +421,9 @@ var DOM_UTILS = (function () {
             fDoc = selectionFrame.contentWindow.document,
             fHead = fDoc.head,
             fBody = fDoc.body,
-            fStyle = fDoc.createElement('style');
-
-        //Set style
-        // noinspection JSAnnotator
-        fStyle.innerHTML = `
-    html,body{
-        margin:0;
-        padding:0;
-        width: 100%;
-        height: 100%;
-        background: transparent !important;
-    }
-    
-    body{
-        overflow: hidden;
-    }
-    
-    svg {
-        position: fixed;
-        top: 0;
-        left: 0;
-        cursor: crosshair !important;
-        width: 100%;
-        height: 100%;
-    }
-    
-    svg > path:first-child {
-        fill: rgba(0,0,0,0);
-        fill-rule: evenodd;
-    }
-    
-    svg > path + path {
-        stroke: #F00;
-        stroke-width: 0.5px;
-        fill: rgba(255,63,63,0.5);
-    }
-    
-    `;
+            fStyle = fDoc.createElement('link');
+        fStyle.rel = 'stylesheet';
+        fStyle.href = IO.url('src/ext/css/selection.css');
         fHead.appendChild(fStyle);
 
         //Init svg namespace
@@ -479,6 +466,8 @@ var DOM_UTILS = (function () {
 
         //Init background overlay path
         var baseBackgroundOverlayPath = _poly(0, 0, ow, oh);
+        //Fix flickering when appearing
+        p1.style.fill = 'rgba(0,0,0,0)';
         p1.setAttribute('d', baseBackgroundOverlayPath);
 
         /**
@@ -512,6 +501,7 @@ var DOM_UTILS = (function () {
         var lastHovered = null;
 
         function _handleMove(e) {
+            //depth=2, ignore overlay
             var hovered = (_elementFromPointDepth(e.clientX, e.clientY, 2));
             if (hovered && (hovered = filterFunc(hovered))) {
                 if (hovered !== lastHovered) {
@@ -532,32 +522,220 @@ var DOM_UTILS = (function () {
             }
         }
 
+        function _handle_escape(e) {
+            if (e.keyCode === 27) {
+                console.log('cancel fucker')
+                onCancel();
+            }
+        }
+
+
         //Set events
         fDoc.addEventListener('mousemove', _handleMove);
+        window.addEventListener('scroll', _handleMove);
         fDoc.addEventListener('click', _handleClick);
 
+        //Current framed document
+        fDoc.onkeyup = _handle_escape;
+        //Shadowed document
+        targetDocument.onkeyup = _handle_escape;
+
         window.ffSelectionModeHandler = _handleMove;
-        window.addEventListener('scroll', _handleMove);
 
     }
 
     /**
      * Disable selection mode
-     * @param targetContainer
+     * @param targetDocument
      * @private
      */
-    function _selection_mode_disable(targetContainer) {
+    function _selection_mode_disable(targetDocument) {
         //Get frame
-        var selectionFrame = document.getElementById('ff-selection-mode-frame');
+        var selectionFrame = targetDocument.getElementById('ff-selection-mode-frame');
         if (selectionFrame) {
             //Delete events
             window.removeEventListener('scroll', window.ffSelectionModeHandler);
+            document.documentElement.onkeyup = null;
             delete window.ffSelectionModeHandler;
             //Delete it
-            targetContainer.removeChild(selectionFrame);
+            targetDocument.body.removeChild(selectionFrame);
         }
     }
 
+    /**
+     * Get shadowed frame (style & scope isolation)
+     * @returns {*}
+     * @private
+     */
+    function _shadow(stylesheets, scripts) {
+
+        //Check exists
+        if (document.getElementById('ff-shadow-frame')) return null;
+
+        //Create frame shadow
+        var shadowFrame = document.createElement('iframe');
+        shadowFrame.id = 'ff-shadow-frame';
+        //Avoid flickering
+        shadowFrame.style.display = 'none';
+        document.body.appendChild(shadowFrame);
+
+        //Get document & head
+        var shadowDoc = shadowFrame.contentWindow.document,
+            shadowHead = shadowDoc.head;
+
+        //Stylesheets & scripts
+        function _process_sheet(type, srcFile) {
+            //Get associated relations
+            var concreteSourceRef = (type === 'text/javascript' ? 'src' : 'href'),
+                concreteTag = (type === 'text/javascript' ? 'script' : 'link');
+            //Instance
+            var sheetTag = shadowDoc.createElement(concreteTag);
+            if (type === 'text/css') sheetTag.setAttribute('rel', 'stylesheet');
+            sheetTag.setAttribute('type', type);
+            sheetTag.setAttribute(concreteSourceRef, srcFile);
+            //On load | error handler
+            sheetTag.onload = _shadowExtResLoaded;
+            sheetTag.onerror = _shadowExtResLoaded;
+            //Add it
+            shadowHead.appendChild(sheetTag);
+        }
+
+        //Total resources to load
+        var totalRes = 0, resLoaded = 0;
+
+        //_triggered when an external resource has been loaded
+        function _shadowExtResLoaded() {
+            resLoaded++;
+            if (resLoaded >= totalRes) {
+                requestAnimationFrame(function () {
+                    //Undo flickering prevention
+                    shadowFrame.style.display = '';
+                    shadowFrame.className = 'ff-overlay';
+                });
+            }
+        }
+
+        //For each sheet
+        var sheets = [], atIScripts, cSheetType = 'text/css';
+        if (stylesheets) sheets = sheets.concat(stylesheets);
+        atIScripts = sheets.length;
+        if (scripts) sheets = sheets.concat(scripts);
+        totalRes = sheets.length;
+        if (totalRes > 0) {
+            for (var s = 0; s < totalRes; ++s) {
+                if (s >= atIScripts) cSheetType = 'text/javascript';
+                _process_sheet(cSheetType, sheets[s]);
+            }
+        } else {
+            _shadowExtResLoaded();
+        }
+
+        return {
+            document: shadowDoc,
+            destroy: function () {
+                if (document.body.contains(shadowFrame)) document.body.removeChild(shadowFrame);
+            }
+        }
+    }
+
+    /**
+     * Create fields selection popup from given model & template
+     * @param targetDocument
+     * @param fieldsModel
+     * @param fieldsTemplate
+     * @returns {*}
+     * @private
+     */
+    function _fields_popup(targetDocument, fieldsModel, fieldsTemplate) {
+
+        //Check exists
+        if (targetDocument.getElementById('ff-fields-popup-container')) return null;
+
+        //Show popup
+        var fOverlay = targetDocument.createElement('div'),
+            fPopup = targetDocument.createElement('div');
+        fOverlay.className = 'ff-popup-overlay';
+        fOverlay.id = 'ff-fields-popup-container';
+        fPopup.className = 'ff-popup';
+        fPopup.innerHTML = '<h3>Veuillez choisir les champs à exporter</h3>';
+        for (var name in fieldsModel.fields) {
+            //Display field as checkbox
+            var
+                fExport = targetDocument.createElement('div'),
+                label = targetDocument.createElement('label'),
+                checkbox = targetDocument.createElement('input');
+
+            checkbox.value = name;
+            checkbox.type = 'checkbox';
+            label.innerText = name;
+            label.insertBefore(checkbox, label.firstChild);
+
+            fExport.appendChild(label);
+
+            //Add it to popup
+            fPopup.appendChild(fExport);
+
+        }
+        //Space
+        fPopup.innerHTML += '<br/>';
+
+
+        //Export button
+        var exportButton = targetDocument.createElement('button'),
+            cancelButton = targetDocument.createElement('button'),
+            exportClbk = function () {
+            },
+            cancelClbk = function () {
+            };
+        exportButton.innerHTML = 'Exporter';
+        cancelButton.innerHTML = 'Annuler';
+        fPopup.appendChild(exportButton);
+        fPopup.appendChild(cancelButton);
+
+        //Export click
+        exportButton.addEventListener('click', function () {
+            //Filter with checked
+            var filteredInputs = (fPopup.querySelectorAll('input[type="checkbox"]:checked'));
+            //Replace user template data
+            fieldsTemplate.data = {};
+            for (var i = 0, ilen = filteredInputs.length; i < ilen; ++i)
+                fieldsTemplate.data[filteredInputs[i].value] = '';
+            //Callback
+            exportClbk(fieldsModel, fieldsTemplate);
+        });
+
+        //Cancel
+        cancelButton.addEventListener('click', function () {
+            //Calback
+            cancelClbk();
+        });
+
+        //Append popup to overlay
+        fOverlay.appendChild(fPopup);
+
+        //Get target container
+        var targetContainer = targetDocument.body;
+
+        //Append overlay in target container
+        targetContainer.appendChild(fOverlay);
+
+        //Associated functions
+        return {
+            open: function (onExport, onCancel) {
+                exportClbk = onExport;
+                cancelClbk = onCancel;
+            },
+            destroy: function () {
+                //Remove popup
+                if (targetContainer.contains(fOverlay)) {
+                    //Remove overlay & other nodes
+                    targetContainer.removeChild(fOverlay)
+                }
+            }
+        }
+
+
+    }
 
     return {
         xpath: _xpath,
@@ -568,7 +746,9 @@ var DOM_UTILS = (function () {
         field_value_set: _field_value_set,
         forms: _forms,
         selection_mode: _selection_mode_enable,
-        selection_mode_end: _selection_mode_disable
+        selection_mode_end: _selection_mode_disable,
+        shadow: _shadow,
+        fields_popup: _fields_popup
     }
 
 }());
