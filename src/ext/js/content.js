@@ -51,7 +51,11 @@ function _selection_mode_enable() {
     if (formsLen === 0) return false;
 
     //Creating shadow root
-    CONTENT_VARS.shadowRoot = DOM_UTILS.shadow([IO.url('src/ext/css/frame.css'), IO.url('src/ext/css/layouts.css')]);
+    CONTENT_VARS.shadowRoot = DOM_UTILS.shadow([
+        IO.url('src/ext/css/frame.css'),
+        IO.url('src/ext/css/layouts.css'),
+        IO.url('src/ext/css/buttons.css')
+    ]);
     //Replace document scope
     var document = CONTENT_VARS.shadowRoot.document;
 

@@ -49,6 +49,7 @@
   "web_accessible_resources": [
     "src/ext/css/layouts.css",
     "src/ext/css/frame.css",
+    "src/ext/css/buttons.css",
     "src/ext/css/selection.css"
   ]
 }

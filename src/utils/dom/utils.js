@@ -524,11 +524,9 @@ var DOM_UTILS = (function () {
 
         function _handle_escape(e) {
             if (e.keyCode === 27) {
-                console.log('cancel fucker')
                 onCancel();
             }
         }
-
 
         //Set events
         fDoc.addEventListener('mousemove', _handleMove);
@@ -657,7 +655,7 @@ var DOM_UTILS = (function () {
         fOverlay.className = 'ff-popup-overlay';
         fOverlay.id = 'ff-fields-popup-container';
         fPopup.className = 'ff-popup';
-        fPopup.innerHTML = '<h3>Veuillez choisir les champs à exporter</h3>';
+        fPopup.innerHTML = '<h4 style="margin-top: 0">Veuillez choisir les champs à exporter</h4>';
         for (var name in fieldsModel.fields) {
             //Display field as checkbox
             var
@@ -676,22 +674,25 @@ var DOM_UTILS = (function () {
             fPopup.appendChild(fExport);
 
         }
-        //Space
-        fPopup.innerHTML += '<br/>';
 
 
-        //Export button
-        var exportButton = targetDocument.createElement('button'),
-            cancelButton = targetDocument.createElement('button'),
+        //Buttons
+
+        var buttons = targetDocument.createElement('div'),
+            exportButton = targetDocument.createElement('div'),
+            cancelButton = targetDocument.createElement('div'),
             exportClbk = function () {
             },
             cancelClbk = function () {
             };
+        buttons.className = 'buttons';
         exportButton.innerHTML = 'Exporter';
         cancelButton.innerHTML = 'Annuler';
-        fPopup.appendChild(exportButton);
-        fPopup.appendChild(cancelButton);
-
+        exportButton.className = 'button';
+        cancelButton.className = 'button';
+        buttons.appendChild(exportButton);
+        buttons.appendChild(cancelButton);
+        fPopup.appendChild(buttons);
         //Export click
         exportButton.addEventListener('click', function () {
             //Filter with checked
