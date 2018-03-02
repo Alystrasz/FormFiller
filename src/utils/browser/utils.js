@@ -26,7 +26,6 @@ var BROWSER_UTILS = (function (namespace) {
      */
     function _tab_active() {
         //Get current tab
-        console.dir(namespace)
         return namespace.tabs.query({
             active: true,
             currentWindow: true
@@ -55,7 +54,8 @@ var BROWSER_UTILS = (function (namespace) {
             if (request.from === from && request.receiver === receiver) {
                 clbk(request.content);
             }
-            return new Promise(function(){});
+            return new Promise(function () {
+            });
         });
     }
 
@@ -77,13 +77,15 @@ var BROWSER_UTILS = (function (namespace) {
 
         //Send message
         if (!tabContext) namespace.runtime.sendMessage(messageContent).then(function () {
-        }).catch(function(){});
+        }).catch(function () {
+        });
         else {
             //Get active tab
             _tab_active().then(function (tabs) {
                 //Given destination is a tab context (current tab)
                 if (tabs[0]) namespace.tabs.sendMessage(tabs[0].id, messageContent).then(function () {
-                }).catch(function(){});
+                }).catch(function () {
+                });
             });
         }
     }

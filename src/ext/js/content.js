@@ -9,6 +9,7 @@ var MESSAGE_HANDLER = BROWSER_UTILS.MESSAGE.register('CONTENT_SCRIPT');
 
 //*** ACTIONS MAP***//
 ACTIONS_MAPPER.map('import_template', _action_template_import);
+ACTIONS_MAPPER.map('models_get', _action_models_get);
 ACTIONS_MAPPER.map('selection_mode_enable', _selection_mode_enable);
 ACTIONS_MAPPER.map('selection_mode_disable', _selection_mode_disable);
 
@@ -33,6 +34,17 @@ function _action_template_import() {
             _form_fill(PARSING.parse(ext, data));
         });
     }
+}
+
+/**
+ * ACTION : get models
+ * NOTE : localStorage is working with domain name (popup hasn't the same domain)
+ * @private
+ */
+function _action_models_get() {
+    //TODO : CENTRALISER LES MODELES DANS LA POPUP OU DANS LE BACKGROUND 
+    //Send models back
+    MESSAGE_HANDLER.send('POPUP', ACTIONS_MAPPER.build('saved_models', [STORAGE_UTILS.all()]));
 }
 
 /**
@@ -117,8 +129,8 @@ function _selection_mode_enable() {
             fieldsPopupSelection.open(function (fieldsModel, fieldsTemplate) {
                 //DEBUG
                 FormFillerLog.log('Serving template', fieldsTemplate);
-                //Storing form model into storage (TODO : Structure)
-                STORAGE_UTILS.store(fieldsModel.uuid, JSON.stringify(fieldsModel));
+                //Storing form model into storage
+                console.log(STORAGE_UTILS.model_save(window.location.hostname, fieldsModel.uuid, fieldsModel));
                 //Download it
                 IO.download(window.location.hostname + '-' + fieldsModel.uuid, fieldsTemplate, IO.FTYPES.JSON);
                 //Remove fields popup
@@ -175,9 +187,7 @@ function _form_fill(userTemplate) {
         //DEBUG
         FormFillerLog.log('Trying to load form UUID => ' + userTemplate.associatedForm);
         //Check associated form of template & storage association
-        if (userTemplate.associatedForm && (associatedFormModel = STORAGE_UTILS.get(userTemplate.associatedForm))) {
-            //Form model as object
-            associatedFormModel = JSON.parse(associatedFormModel);
+        if (userTemplate.associatedForm && (associatedFormModel = STORAGE_UTILS.model_load(window.location.hostname, userTemplate.associatedForm))) {
             //Get fields to fill & user fields
             var associatedFormFields = associatedFormModel.fields,
                 userFields = userTemplate.data;
@@ -198,7 +208,7 @@ function _form_fill(userTemplate) {
             }
 
         } else {
-            alert("Le formulaire n'existe plus !");
+            alert("Impossible de trouver le formulaire associé !");
         }
     }
 }

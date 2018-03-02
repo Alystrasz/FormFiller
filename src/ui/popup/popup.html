@@ -5,6 +5,7 @@
     <title>title</title>
     <script type="text/javascript" src="/src/polyfills/browser-polyfill.min.js"></script>
     <script type="text/javascript" src="/src/utils/browser/utils.js"></script>
+    <script type="text/javascript" src="/src/utils/computing/utils.js"></script>
     <script type="text/javascript" src="/src/utils/storage/utils.js"></script>
     <script type="text/javascript" src="/src/utils/actions/mapper.js"></script>
     <script type="text/javascript" src="popup.js"></script>
@@ -33,12 +34,12 @@
     </div>
 </div>
 <div class="fContent">
-    <p>
-        Automatisez le remplissage des formulaires !
-        <br/>
-        <br/>
-        Veuillez sélectionner une option pour continuer
-    </p>
+    <h4 style="margin-bottom: 10px">Formulaires enregistrés sur ce site</h4>
+    <div style="max-height: 350px; overflow-x: hidden; overflow-y: auto">
+        <div id="savedModels" class="models">
+            Aucun formulaire
+        </div>
+    </div>
     <div class="buttons">
         <div class="button" id="select_start">Sélectionner les formulaires</div>
         <div class="button" id="file_import">Importer un formulaire</div>
