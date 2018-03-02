@@ -1,0 +1,43 @@
+.ff-context {
+    display: none;
+    position: fixed;
+    border: 1px solid #cacaca;
+    text-align: left;
+    background: #F9F9F9;
+    box-shadow: 1px 1px 5px rgba(0, 0, 0, 0.3);
+    border-radius: 2px;
+    min-width: 150px;
+}
+
+.ff-context .ff-items {
+    list-style: none;
+    font-size: 17px;
+    font-family: 'Open sans', sans-serif;
+    color: #333333;
+    -webkit-margin-before: 0;
+    -webkit-margin-after: 0;
+    -webkit-margin-start: 0;
+    -webkit-margin-end: 0;
+    -webkit-padding-start: 0;
+
+    border-top: 1px solid #34495e;
+
+}
+
+.ff-context .ff-items:first-child {
+    border-top: none;
+
+}
+
+.ff-context .ff-items li {
+    padding: 5px 8px;
+    text-transform: capitalize;
+    cursor: pointer;
+
+}
+
+.ff-context .ff-items li:hover {
+    color: white;
+    background: #2c3e50;
+    font-weight: bold;
+}

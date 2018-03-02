@@ -1,5 +1,9 @@
 var DOM_UTILS = (function () {
 
+    var DOM_VARS = {
+        scrollInstance: null
+    };
+
     /**
      * Short version (useful for minify) of getAttribute
      * @param element
@@ -50,13 +54,12 @@ var DOM_UTILS = (function () {
     /**
      * Deduce input name
      * @param input
-     * @param inputIndex (Used if no criteria has been found to deduce the name)
      * @param names Already registered names
      * @param inputWNameIndex Index of inputs without name
-     * @returns {string}
+     * @returns {{name: string, inputWNameIndex: *}}
      * @private
      */
-    function _input_name_deduce(input, inputIndex, names, inputWNameIndex) {
+    function _input_name_deduce(input, names, inputWNameIndex) {
         //Init result
         var inputName = '',
             //Input ID
@@ -141,7 +144,7 @@ var DOM_UTILS = (function () {
                         //Init label search
                         var inputLabel;
                         //Seek for label, starting from input parent
-                        if (inputLabel = labelSeek(inputParent, inputID)) {
+                        if (inputID && (inputLabel = labelSeek(inputParent, inputID))) {
                             //Label text content
                             inputName = inputLabel.firstChild.textContent;
                         } else {
@@ -156,12 +159,14 @@ var DOM_UTILS = (function () {
                 }
             }
         }
+
         //**Last criteria** (default)
         if (!inputName) {
             //Name or ID ?
             inputName = _attr(input, 'name') || inputID
                 || 'input[' + (inputWNameIndex++) + ']';
         }
+
         //Remove punctuation from input name
         var plInputName = inputName.replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g, ' ');
         //Extra-spaces & trim
@@ -170,9 +175,9 @@ var DOM_UTILS = (function () {
         var nameExists = names.indexOf(inputName);
         if (nameExists > -1) {
             //Get next occurrence count & fix name
-            inputName += names.filter(function (e) {
+            inputName += '[' + (names.filter(function (e) {
                 return e === inputName;
-            }).length + 1;
+            }).length + 1) + ']';
         }
         //Push given name into registered names
         names.push(inputName);
@@ -181,6 +186,28 @@ var DOM_UTILS = (function () {
             name: inputName,
             inputWNameIndex: inputWNameIndex
         };
+    }
+
+    /**
+     * Deduce field values (ex : select)
+     * @param fieldStruct
+     * @returns {*}
+     * @private
+     */
+    function _field_values(fieldStruct) {
+        //Get type
+        var fType = fieldStruct.type.split('-')[0].trim();
+        //[select] list style
+        if (fType === 'select') {
+            //Get options
+            return (Array.prototype.slice.call(fieldStruct.element.querySelectorAll('option')).map(function (element) {
+                //Get inner text
+                return element.innerText;
+            }));
+        } else if (fType === 'radio') {
+            return false;
+        }
+        return fieldStruct.values;
     }
 
     /**
@@ -208,17 +235,20 @@ var DOM_UTILS = (function () {
             //Current input
             var input = inputs[j],
                 //Deduce input name
-                inputNameStruct = _input_name_deduce(input, j, inputNames, inputWNameIndex),
-                //Final input structure
+                inputNameStruct = _input_name_deduce(input, inputNames, inputWNameIndex),
+                //Input struct
                 iStruct = {
                     element: input,
                     type: input.type,
                     name: inputNameStruct.name,
+                    values: '',
                     xpath: DOM_UTILS.xpath(input)
                 };
             //Set inputs without name index
             inputWNameIndex = inputNameStruct.inputWNameIndex;
-            //Add struct to result
+            //Deduce input values
+            iStruct.values = _field_values(iStruct);
+            //Add final structure to result
             finputs.push(iStruct);
         }
         return finputs;
@@ -243,11 +273,12 @@ var DOM_UTILS = (function () {
         //For each field
         for (var i = 0; i < fCnt; ++i) {
             //Current
-            var cField = fields[i];
+            var field = fields[i];
             //Model<>conversion
-            fModel.fields[cField.name] = {
-                type: cField.type,
-                xpath: cField.xpath
+            fModel.fields[field.name] = {
+                type: field.type,
+                values: field.values,
+                xpath: field.xpath
             }
         }
         //Return fields model
@@ -269,7 +300,7 @@ var DOM_UTILS = (function () {
         //Copy fields names
         for (var k in modelFields) {
             if (modelFields.hasOwnProperty(k))
-                formFillTemplate.data[k] = '';
+                formFillTemplate.data[k] = modelFields[k].values;
         }
         //Return template
         return formFillTemplate;
@@ -283,15 +314,33 @@ var DOM_UTILS = (function () {
      * @private
      */
     function _field_value_set(element, type, value) {
-        var vsetNamespace = 'value';
-        if (type === 'checkbox' || type === 'radio') {
-            vsetNamespace = 'checked';
-        }
-        if (type.split('-')[0].trim() !== 'select')
-            element[vsetNamespace] = value;
-        else {
-            //TODO
-            FormFillerLog.warn('Type : ' + type + ' not supported !');
+        //Get value namespace & type
+        var fieldValueNamespace = 'value',
+            fieldType = type.split('-')[0].trim();
+        //Check types
+        if (fieldType !== 'select') {
+            if (fieldType === 'checkbox' || fieldType === 'radio') {
+                fieldValueNamespace = 'checked';
+            }
+            //Set value
+            element[fieldValueNamespace] = value;
+        } else {
+            //Get all options
+            if (value instanceof Array) {
+                var options = element.querySelectorAll('option'),
+                    optionsLeft = value.length;
+                //For each option
+                for (var o = 0, olen = options.length; o < olen; ++o) {
+                    var cOptions = options[o];
+                    //If found in value
+                    if (value.indexOf(cOptions.innerText) > -1) {
+                        //Set selected
+                        cOptions.selected = true;
+                        //Loop optimization
+                        if (--optionsLeft === 0) break;
+                    }
+                }
+            }
         }
     }
 
@@ -386,15 +435,123 @@ var DOM_UTILS = (function () {
     }
 
     /**
+     * Abort current scroll animation
+     * @private
+     */
+    function _dom_scroll_abort() {
+        //Get scroll instance
+        var scrollInstance = DOM_VARS.scrollInstance;
+        //Check if scroll animation is still running
+        if (scrollInstance !== null) {
+            //Clear frame callback
+            cancelAnimationFrame(scrollInstance);
+            //Cancel frame
+            DOM_VARS.scrollInstance = null;
+            //Detach 'mousewheel' event
+            window.removeEventListener('mousewheel', _dom_scroll_abort, true);
+            //Detach 'touchmove' event
+            window.removeEventListener('touchmove', _dom_scroll_abort, true);
+        }
+    }
+
+
+    /**
+     * Scroll dom to given bounds
+     * @param bounds
+     * @param duration
+     * @private
+     */
+    function _dom_scroll_to(bounds, duration) {
+        /**
+         * Scroll ease in out quad calculation
+         * @param t
+         * @param b
+         * @param c
+         * @param d
+         * @returns {*}
+         * @private
+         */
+        function easeInOutQuad(t, b, c, d) {
+            t /= d / 2;
+            if (t < 1) return c / 2 * t * t + b;
+            t--;
+            return -c / 2 * (t * (t - 2) - 1) + b
+        }
+
+        /**
+         * Get curent scroll position
+         * @returns {{top: number, left: number}}
+         * @private
+         */
+        function _scroll_position() {
+            return {
+                top: window.pageYOffset || document.documentElement.scrollTop || document.body.scrollTop,
+                left: window.pageXOffset || document.documentElement.scrollLeft || document.body.scrollLeft
+            };
+        }
+
+        //Abort scroll if any
+        _dom_scroll_abort();
+
+        //Get vars
+        var
+            // Calculate how far to scroll
+            stopY = Math.max(0, (bounds.top - (window.innerHeight) / 2) + bounds.height),
+            stopX = Math.max(0, (bounds.left - (window.innerWidth + bounds.width) / 2)),
+            // Cache starting position
+            scrollPosition = _scroll_position(),
+            startY = scrollPosition.top,
+            startX = scrollPosition.left,
+            distanceX = stopX - startX,
+            distanceY = stopY - startY,
+            timeStart,
+            timeElapsed,
+            nextX, nextY;
+
+        //Catch user mouse wheel to abort scroll
+        window.addEventListener('mousewheel', _dom_scroll_abort, true);
+        window.addEventListener('touchmove', _dom_scroll_abort, true);
+
+        function loop(timeCurrent) {
+            // Store time scroll started, if not started already
+            if (!timeStart) {
+                timeStart = timeCurrent
+            }
+            // Determine time spent scrolling so far
+            timeElapsed = timeCurrent - timeStart;
+            // Calculate next scroll position
+            nextY = easeInOutQuad(timeElapsed, startY, distanceY, duration);
+            nextX = easeInOutQuad(timeElapsed, startX, distanceX, duration);
+            //Scroll to it
+            window.scrollTo(nextX, nextY);
+            // Keep scrolling or done
+            if (timeElapsed < duration) {
+                DOM_VARS.scrollInstance = requestAnimationFrame(loop);
+            }
+            else {
+                //Abort scroll frame
+                _dom_scroll_abort();
+                // Account for rAF time rounding inaccuracies
+                window.scrollTo(startX + distanceX, startY + distanceY);
+                // Reset time for next jump
+                timeStart = null;
+            }
+        }
+
+        // Start the loop
+        if (distanceX !== 0 || distanceY !== 0) DOM_VARS.scrollInstance = requestAnimationFrame(loop);
+    }
+
+    /**
      * Enter selection mode
      * @param targetDocument
      * @param onHover
      * @param onSelected
-     * @param onCancel
      * @param filterFunc
+     * @param contextMenuItems
      * @private
      */
-    function _selection_mode_enable(targetDocument, onHover, onSelected, onCancel, filterFunc) {
+    function _selection_mode_enable(targetDocument, onHover, onSelected, filterFunc, contextMenuItems) {
 
         //Check if frame already exists
         if (targetDocument.getElementById('ff-selection-mode-frame'))
@@ -421,10 +578,14 @@ var DOM_UTILS = (function () {
             fDoc = selectionFrame.contentWindow.document,
             fHead = fDoc.head,
             fBody = fDoc.body,
-            fStyle = fDoc.createElement('link');
-        fStyle.rel = 'stylesheet';
-        fStyle.href = IO.url('src/ext/css/selection.css');
-        fHead.appendChild(fStyle);
+            selectionStyle = fDoc.createElement('link'),
+            contextMenuStyle = fDoc.createElement('link');
+        selectionStyle.rel = 'stylesheet';
+        selectionStyle.href = IO.url('src/ext/css/selection.css');
+        contextMenuStyle.rel = 'stylesheet';
+        contextMenuStyle.href = IO.url('src/ext/css/context-menu.css');
+        fHead.appendChild(selectionStyle);
+        fHead.appendChild(contextMenuStyle);
 
         //Init svg namespace
         var svgnps = 'http://www.w3.org/2000/svg',
@@ -496,7 +657,7 @@ var DOM_UTILS = (function () {
             p2.setAttribute('d', poly);
         }
 
-        /** HANDLERS **/
+        /** HANDLE SELECTION **/
 
         var lastHovered = null;
 
@@ -516,28 +677,78 @@ var DOM_UTILS = (function () {
             }
         }
 
+        //Handle clicks
         function _handleClick() {
+            //Undo context item
+            if (contextMenuItemsLen > 0) _contextMenu(false);
+            //Select event
             if (lastHovered) {
                 onSelected(lastHovered);
             }
         }
 
-        function _handle_escape(e) {
-            if (e.keyCode === 27) {
-                onCancel();
+
+        /** CONTEXT MENU **/
+
+            //Check context menu items
+        var contextMenuItemsLen = !contextMenuItems ? 0 : contextMenuItems.length;
+
+        if (contextMenuItemsLen > 0) {
+
+            //Create context menu
+            var contextMenu = fDoc.createElement('div');
+            contextMenu.className = 'ff-context';
+
+            //Fill context items
+            for (var i = 0; i < contextMenuItemsLen; ++i) {
+                //Category
+                var cItem = contextMenuItems[i],
+                    contextItems = fDoc.createElement('ul');
+                contextItems.className = 'ff-items';
+                //For each category items
+                for (var name in cItem) {
+                    if (cItem.hasOwnProperty(name)) {
+                        //Get item & create it
+                        var itemClick = cItem[name],
+                            contextItem = fDoc.createElement('li');
+                        contextItem.innerText = name;
+                        contextItem.addEventListener('click', itemClick);
+                        //Add it to category
+                        contextItems.appendChild(contextItem);
+                    }
+                }
+                //Add it to context menu
+                contextMenu.appendChild(contextItems);
             }
+
+            //Add context menu
+            fBody.appendChild(contextMenu);
+
+            //Context menu trigger
+            function _contextMenu(visible, coords) {
+                if (visible && coords) {
+                    contextMenu.style.left = coords.left + 'px';
+                    contextMenu.style.top = coords.top + 'px';
+                }
+                contextMenu.style.display = visible ? 'block' : 'none';
+            }
+
+
+            fDoc.addEventListener('contextmenu', function (e) {
+                e.preventDefault();
+                e.stopPropagation();
+                _contextMenu(true, {
+                    left: e.clientX,
+                    top: e.clientY
+                });
+            }, false);
+
         }
 
-        //Set events
+        /** EVENTS **/
         fDoc.addEventListener('mousemove', _handleMove);
-        window.addEventListener('scroll', _handleMove);
         fDoc.addEventListener('click', _handleClick);
-
-        //Current framed document
-        fDoc.onkeyup = _handle_escape;
-        //Shadowed document
-        targetDocument.onkeyup = _handle_escape;
-
+        window.addEventListener('scroll', _handleMove);
         window.ffSelectionModeHandler = _handleMove;
 
     }
@@ -553,7 +764,6 @@ var DOM_UTILS = (function () {
         if (selectionFrame) {
             //Delete events
             window.removeEventListener('scroll', window.ffSelectionModeHandler);
-            document.documentElement.onkeyup = null;
             delete window.ffSelectionModeHandler;
             //Delete it
             targetDocument.body.removeChild(selectionFrame);
@@ -656,6 +866,8 @@ var DOM_UTILS = (function () {
         fOverlay.id = 'ff-fields-popup-container';
         fPopup.className = 'ff-popup';
         fPopup.innerHTML = '<h4 style="margin-top: 0">Veuillez choisir les champs à exporter</h4>';
+
+        //For each field
         for (var name in fieldsModel.fields) {
             //Display field as checkbox
             var
@@ -675,9 +887,7 @@ var DOM_UTILS = (function () {
 
         }
 
-
         //Buttons
-
         var buttons = targetDocument.createElement('div'),
             exportButton = targetDocument.createElement('div'),
             cancelButton = targetDocument.createElement('div'),
@@ -699,15 +909,17 @@ var DOM_UTILS = (function () {
             var filteredInputs = (fPopup.querySelectorAll('input[type="checkbox"]:checked'));
             //Replace user template data
             fieldsTemplate.data = {};
-            for (var i = 0, ilen = filteredInputs.length; i < ilen; ++i)
-                fieldsTemplate.data[filteredInputs[i].value] = '';
-            //Callback
+            for (var i = 0, ilen = filteredInputs.length; i < ilen; ++i) {
+                var fieldName = filteredInputs[i].value;
+                fieldsTemplate.data[fieldName] = fieldsModel.fields[fieldName].values;
+            }
+            //Callback (encapsulated, can change)
             exportClbk(fieldsModel, fieldsTemplate);
         });
 
         //Cancel
         cancelButton.addEventListener('click', function () {
-            //Calback
+            //Calback (encapsulated, can change)
             cancelClbk();
         });
 
@@ -749,7 +961,8 @@ var DOM_UTILS = (function () {
         selection_mode: _selection_mode_enable,
         selection_mode_end: _selection_mode_disable,
         shadow: _shadow,
-        fields_popup: _fields_popup
+        fields_popup: _fields_popup,
+        scroll_to: _dom_scroll_to
     }
 
 }());

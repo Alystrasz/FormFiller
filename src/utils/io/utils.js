@@ -64,6 +64,7 @@ var IO = (function () {
                 };
                 reader.readAsText(current_data);
             }
+            file.value = '';
         });
         file.style.display = 'none';
         file.accept = '.json,.yaml';

@@ -26,6 +26,7 @@ var BROWSER_UTILS = (function (namespace) {
      */
     function _tab_active() {
         //Get current tab
+        console.dir(namespace)
         return namespace.tabs.query({
             active: true,
             currentWindow: true

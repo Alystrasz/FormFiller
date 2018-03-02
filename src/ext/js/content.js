@@ -1,6 +1,3 @@
-//Debug
-FormFillerLog.info('Content script loaded');
-
 //Init vars
 var CONTENT_VARS = {
     importDialog: IO.fileDialog(),
@@ -48,31 +45,50 @@ function _selection_mode_enable() {
     var forms = DOM_UTILS.forms(true), formsLen = forms.length;
 
     //Check found forms
-    if (formsLen === 0) return false;
+    if (formsLen === 0) {
+        alert("Aucun formulaire n'a été détecté sur la page !");
+        return false;
+    }
 
     //Creating shadow root
+    //NOTE : each loaded resource must be declared in manifest
     CONTENT_VARS.shadowRoot = DOM_UTILS.shadow([
         IO.url('src/ext/css/frame.css'),
         IO.url('src/ext/css/layouts.css'),
         IO.url('src/ext/css/buttons.css')
     ]);
+
     //Replace document scope
     var document = CONTENT_VARS.shadowRoot.document;
 
-    //Init fields selection popup
-    var fieldsPopupSelection;
+    //Init context menu items
+    var contextMenuItems = [],
+        contextMenuFormsItems = {};
+    //Cancel
+    contextMenuItems.push({
+        Annuler: _selection_mode_disable
+    });
+    //Forms
+    for (var f = 0; f < formsLen; ++f) {
+        //Closure mutation
+        (function () {
+            //Display forms in popup
+            var form = forms[f].form;
+            contextMenuFormsItems['Formulaire ' + (f + 1)] = function () {
+                DOM_UTILS.scroll_to(form.getBoundingClientRect(), 250);
+            }
+        }());
+    }
+    contextMenuItems.push(contextMenuFormsItems);
 
     //Enable selection mode
     DOM_UTILS.selection_mode(document, function (element) {
         //DEBUG
-        FormFillerLog.log('Hovered', element);
+        //FormFillerLog.log('Hovered', element);
     }, function (element) {
 
         //NOTE : element is type of form
         FormFillerLog.log('Selected', element);
-
-        //Undo select mode
-        DOM_UTILS.selection_mode_end(document);
 
         //Retrieve associated form fields
         var associatedFieldsModel;
@@ -95,7 +111,7 @@ function _selection_mode_enable() {
             console.log('User model', fieldsTemplate);
 
             //Instance fields selection popup
-            fieldsPopupSelection = DOM_UTILS.fields_popup(document, fieldsModel, fieldsTemplate);
+            var fieldsPopupSelection = DOM_UTILS.fields_popup(document, fieldsModel, fieldsTemplate);
 
             //Open fields selection
             fieldsPopupSelection.open(function (fieldsModel, fieldsTemplate) {
@@ -104,7 +120,7 @@ function _selection_mode_enable() {
                 //Storing form model into storage (TODO : Structure)
                 STORAGE_UTILS.store(fieldsModel.uuid, JSON.stringify(fieldsModel));
                 //Download it
-                IO.download(fieldsModel.uuid, fieldsTemplate, IO.FTYPES.JSON);
+                IO.download(window.location.hostname + '-' + fieldsModel.uuid, fieldsTemplate, IO.FTYPES.JSON);
                 //Remove fields popup
                 fieldsPopupSelection.destroy();
                 //End selection mode
@@ -112,19 +128,12 @@ function _selection_mode_enable() {
             }, function () {
                 //Remove fields popup
                 fieldsPopupSelection.destroy();
-                //End selection mode
-                _selection_mode_disable();
             });
 
         } else {
-            FormFillerLog.error('No associated fields found');
+            alert('Erreur interne : récupération des champs impossible');
         }
 
-    }, function () {
-        //Remove fields popup
-        if (fieldsPopupSelection) fieldsPopupSelection.destroy();
-        //End selection mode
-        _selection_mode_disable();
     }, function (element) {
         //Check if element is in form or if it's the form itself
         for (var f = 0; f < formsLen; ++f) {
@@ -133,7 +142,7 @@ function _selection_mode_enable() {
                 || cForm.form.contains(element)) return cForm.form;
         }
         return null;
-    });
+    }, contextMenuItems);
 }
 
 /**
@@ -173,15 +182,18 @@ function _form_fill(userTemplate) {
             var associatedFormFields = associatedFormModel.fields,
                 userFields = userTemplate.data;
             for (var fieldName in associatedFormFields) {
-                //Get current field & user associated data
-                var currentField = associatedFormFields[fieldName],
-                    userFieldData = userFields[fieldName];
-                //If not undefined
-                if (userFieldData !== undefined) {
-                    //DEBUG
-                    FormFillerLog.log('Filling [' + fieldName + '] with data => ' + userFieldData);
-                    //Fill field with user data
-                    DOM_UTILS.field_value_set(DOM_UTILS.fromXPath(currentField.xpath), currentField.type, userFieldData);
+                //Check property
+                if (associatedFormFields.hasOwnProperty(fieldName)) {
+                    //Get current field & user associated data
+                    var currentField = associatedFormFields[fieldName],
+                        userFieldData = userFields[fieldName];
+                    //If not undefined
+                    if (userFieldData !== undefined) {
+                        //DEBUG
+                        FormFillerLog.log('Filling [' + fieldName + '] with data => ' + userFieldData);
+                        //Fill field with user data
+                        DOM_UTILS.field_value_set(DOM_UTILS.fromXPath(currentField.xpath), currentField.type, userFieldData);
+                    }
                 }
             }
 
