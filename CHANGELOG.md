@@ -23,3 +23,4 @@
     - Autofill via prototype
 - Add non-form fields
 - Interface improvements (CSS rework)
+- i18n
