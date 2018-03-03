@@ -15,12 +15,15 @@
     - All inputs are selected by default
     - Export selected inputs only
 
-**TODO**
-
-- FIX FILL NON CHARGE
+### Since February 21th, 2018
+- Interface improvements (CSS rework)
 - Fields autofill
     - Form detection (with the key stored in json)
     - Autofill via prototype
+- Settings page
+
+**TODO**
+
+- FIX FILL NON CHARGE
 - Add non-form fields
-- Interface improvements (CSS rework)
 - i18n

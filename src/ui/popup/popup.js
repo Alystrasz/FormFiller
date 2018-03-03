@@ -27,6 +27,12 @@ document.addEventListener('DOMContentLoaded', function () {
         MESSAGE_HANDLER.send('CONTENT_SCRIPT', ACTIONS_MAPPER.build('import_template'), true);
     });
 
+    //Open settings view
+    document.getElementById('open_options').addEventListener('click', function () {
+        console.log('hello');
+        browser.runtime.openOptionsPage();
+    });
+
     //Get saved models
     MESSAGE_HANDLER.send('CONTENT_SCRIPT', ACTIONS_MAPPER.build('models_get'), true);
 
@@ -59,5 +65,7 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
 
-
+    function openOptionsPage() {
+        browser.runtime.openOptionsPage();
+    }
 });

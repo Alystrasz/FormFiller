@@ -27,6 +27,8 @@ file, in the project folder. You're good to go!
 
 Under the supervision of [Samuel Hym](mailto:samuel.hym@univ-lille1.fr).
 
+---
+
 ## Using
 
 ![Extension pop-up](img/popup.png)

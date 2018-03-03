@@ -8,6 +8,10 @@
     "default_popup": "src/ui/popup/popup.html",
     "default_icon": "src/ui/icons/icon38.png"
   },
+  "options_ui": {
+    "page": "src/ui/options/options.html",
+    "open_in_tab": true
+  },
   "permissions": [
     "activeTab",
     "storage"
