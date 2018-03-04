@@ -10,7 +10,6 @@
 }
 
 .ff-context .ff-items {
-    list-style: none;
     font-size: 17px;
     font-family: 'Open sans', sans-serif;
     color: #333333;
@@ -19,7 +18,9 @@
     -webkit-margin-start: 0;
     -webkit-margin-end: 0;
     -webkit-padding-start: 0;
-
+    padding: 0;
+    margin:0;
+    list-style-type: none;
     border-top: 1px solid #34495e;
 
 }

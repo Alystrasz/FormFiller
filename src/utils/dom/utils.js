@@ -549,6 +549,7 @@ var DOM_UTILS = (function () {
      * @param onSelected
      * @param filterFunc
      * @param contextMenuItems
+     * @returns {boolean}
      * @private
      */
     function _selection_mode_enable(targetDocument, onHover, onSelected, filterFunc, contextMenuItems) {
@@ -573,189 +574,201 @@ var DOM_UTILS = (function () {
         selectionFrame.className = 'ff-overlay';
         targetContainer.appendChild(selectionFrame);
 
-        //Get doc & body
-        var
-            fDoc = selectionFrame.contentWindow.document,
-            fHead = fDoc.head,
-            fBody = fDoc.body,
-            selectionStyle = fDoc.createElement('link'),
-            contextMenuStyle = fDoc.createElement('link');
-        selectionStyle.rel = 'stylesheet';
-        selectionStyle.href = IO.url('src/ext/css/selection.css');
-        contextMenuStyle.rel = 'stylesheet';
-        contextMenuStyle.href = IO.url('src/ext/css/context-menu.css');
-        fHead.appendChild(selectionStyle);
-        fHead.appendChild(contextMenuStyle);
-
-        //Init svg namespace
-        var svgnps = 'http://www.w3.org/2000/svg',
-            //Set selection overlay (SVG)
-            selectionOverlay = fDoc.createElementNS(svgnps, 'svg'),
-            //Set paths
-            p1 = fDoc.createElementNS(svgnps, 'path'),
-            p2 = fDoc.createElementNS(svgnps, 'path');
-
-        //Append paths
-        selectionOverlay.appendChild(p1);
-        selectionOverlay.appendChild(p2);
-
-        //Append svg container
-        fBody.appendChild(selectionOverlay);
+        //FF/IE FIX => Timeout hack to prevent content from being cleared when <iframe> is inserted
+        setTimeout(function () {
 
 
-        /**
-         * Get associated poly path of given coords
-         * @param x
-         * @param y
-         * @param w
-         * @param h
-         * @returns {string}
-         * @private
-         */
-        function _poly(x, y, w, h) {
-            var ws = w.toFixed(1);
-            return 'M' + x.toFixed(1) + ' ' + y.toFixed(1) +
-                'h' + ws +
-                'v' + h.toFixed(1) +
-                'h-' + ws +
-                'z';
-        }
+            //Get doc & body
+            var
+                fDoc = selectionFrame.contentWindow.document,
+                fHead = fDoc.head,
+                fBody = fDoc.body,
+                selectionStyle = fDoc.createElement('link'),
+                contextMenuStyle = fDoc.createElement('link');
+            selectionStyle.rel = 'stylesheet';
+            selectionStyle.href = IO.url('src/ext/css/selection.css');
+            contextMenuStyle.rel = 'stylesheet';
+            contextMenuStyle.href = IO.url('src/ext/css/context-menu.css');
+            fHead.appendChild(selectionStyle);
+            fHead.appendChild(contextMenuStyle);
 
-        //Get window dimensions
-        var ow = selectionFrame.contentWindow.innerWidth;
-        var oh = selectionFrame.contentWindow.innerHeight;
+            //Init svg namespace
+            var svgnps = 'http://www.w3.org/2000/svg',
+                //Set selection overlay (SVG)
+                selectionOverlay = fDoc.createElementNS(svgnps, 'svg'),
+                //Set paths
+                p1 = fDoc.createElementNS(svgnps, 'path'),
+                p2 = fDoc.createElementNS(svgnps, 'path');
 
-        //Init background overlay path
-        var baseBackgroundOverlayPath = _poly(0, 0, ow, oh);
-        //Fix flickering when appearing
-        p1.style.fill = 'rgba(0,0,0,0)';
-        p1.setAttribute('d', baseBackgroundOverlayPath);
+            //Append paths
+            selectionOverlay.appendChild(p1);
+            selectionOverlay.appendChild(p2);
 
-        /**
-         * Highlight given element
-         * @param element
-         * @private
-         */
-        function _highlight(element) {
-            //Init background overlay poly path
-            var bgOverlayPoly = [
-                'M0 0',
-                'h', ow,
-                'v', oh,
-                'h-', ow,
-                'z'
-            ];
-            //Get element position
-            var pos = element.getBoundingClientRect(),
-                //Get poly of pos
-                poly = _poly(pos.left, pos.top, pos.width, pos.height);
-            //Append poly path to overlay
-            bgOverlayPoly.push(poly);
-            //Set background overlay path
-            p1.setAttribute('d', bgOverlayPoly.join(''));
-            //Set highlight path
-            p2.setAttribute('d', poly);
-        }
+            //Append svg container
+            fBody.appendChild(selectionOverlay);
 
-        /** HANDLE SELECTION **/
 
-        var lastHovered = null;
+            /**
+             * Get associated poly path of given coords
+             * @param x
+             * @param y
+             * @param w
+             * @param h
+             * @returns {string}
+             * @private
+             */
+            function _poly(x, y, w, h) {
+                var ws = w.toFixed(1);
+                return 'M' + x.toFixed(1) + ' ' + y.toFixed(1) +
+                    'h' + ws +
+                    'v' + h.toFixed(1) +
+                    'h-' + ws +
+                    'z';
+            }
 
-        function _handleMove(e) {
-            //depth=2, ignore overlay
-            var hovered = (_elementFromPointDepth(e.clientX, e.clientY, 2));
-            if (hovered && (hovered = filterFunc(hovered))) {
-                if (hovered !== lastHovered) {
-                    lastHovered = hovered;
-                    _highlight(hovered);
-                    onHover(hovered);
+            //Get window dimensions
+            var ow = selectionFrame.contentWindow.innerWidth;
+            var oh = selectionFrame.contentWindow.innerHeight;
+
+            //Init background overlay path
+            var baseBackgroundOverlayPath = _poly(0, 0, ow, oh);
+            //Fix flickering when appearing
+            p1.style.fill = 'rgba(0,0,0,0)';
+            p1.setAttribute('d', baseBackgroundOverlayPath);
+
+            /**
+             * Highlight given element
+             * @param element
+             * @private
+             */
+            function _highlight(element) {
+                //Init background overlay poly path
+                var bgOverlayPoly = [
+                    'M0 0',
+                    'h', ow,
+                    'v', oh,
+                    'h-', ow,
+                    'z'
+                ];
+                //Get element position
+                var pos = element.getBoundingClientRect(),
+                    //Get poly of pos
+                    poly = _poly(pos.left, pos.top, pos.width, pos.height);
+                //Append poly path to overlay
+                bgOverlayPoly.push(poly);
+                //Set background overlay path
+                p1.setAttribute('d', bgOverlayPoly.join(''));
+                //Set highlight path
+                p2.setAttribute('d', poly);
+            }
+
+            /** HANDLE SELECTION **/
+
+            var lastHovered = null;
+
+            function _handleMove(e) {
+                //depth=2, ignore overlay
+                var hovered = (_elementFromPointDepth(e.clientX, e.clientY, 2));
+                if (hovered && (hovered = filterFunc(hovered))) {
+                    if (hovered !== lastHovered) {
+                        lastHovered = hovered;
+                        _highlight(hovered);
+                        onHover(hovered);
+                    }
+                } else {
+                    lastHovered = null;
+                    p1.setAttribute('d', baseBackgroundOverlayPath);
+                    p2.setAttribute('d', '');
                 }
-            } else {
-                lastHovered = null;
-                p1.setAttribute('d', baseBackgroundOverlayPath);
-                p2.setAttribute('d', '');
             }
-        }
 
-        //Handle clicks
-        function _handleClick() {
-            //Undo context item
-            if (contextMenuItemsLen > 0) _contextMenu(false);
-            //Select event
-            if (lastHovered) {
-                onSelected(lastHovered);
-            }
-        }
-
-
-        /** CONTEXT MENU **/
-
-            //Check context menu items
-        var contextMenuItemsLen = !contextMenuItems ? 0 : contextMenuItems.length;
-
-        if (contextMenuItemsLen > 0) {
-
-            //Create context menu
-            var contextMenu = fDoc.createElement('div');
-            contextMenu.className = 'ff-context';
-
-            //Fill context items
-            for (var i = 0; i < contextMenuItemsLen; ++i) {
-                //Category
-                var cItem = contextMenuItems[i],
-                    contextItems = fDoc.createElement('ul');
-                contextItems.className = 'ff-items';
-                //For each category items
-                for (var name in cItem) {
-                    if (cItem.hasOwnProperty(name)) {
-                        //Get item & create it
-                        var itemClick = cItem[name],
-                            contextItem = fDoc.createElement('li');
-                        contextItem.innerText = name;
-                        contextItem.addEventListener('click', itemClick);
-                        //Add it to category
-                        contextItems.appendChild(contextItem);
+            //Handle clicks
+            function _handleClick(e) {
+                //Left click
+                if (e.button === 0) {
+                    //Undo context item
+                    if (contextMenuItemsLen > 0) _contextMenu(false);
+                    //Select event
+                    if (lastHovered) {
+                        onSelected(lastHovered);
                     }
                 }
-                //Add it to context menu
-                contextMenu.appendChild(contextItems);
             }
 
-            //Add context menu
-            fBody.appendChild(contextMenu);
 
-            //Context menu trigger
-            function _contextMenu(visible, coords) {
-                if (visible && coords) {
-                    contextMenu.style.left = coords.left + 'px';
-                    contextMenu.style.top = coords.top + 'px';
+            /** CONTEXT MENU **/
+
+                //Check context menu items
+            var contextMenuItemsLen = !contextMenuItems ? 0 : contextMenuItems.length;
+
+            if (contextMenuItemsLen > 0) {
+
+                //Create context menu
+                var contextMenu = fDoc.createElement('div');
+                contextMenu.className = 'ff-context';
+
+                //Fill context items
+                for (var i = 0; i < contextMenuItemsLen; ++i) {
+                    //Category
+                    var cItem = contextMenuItems[i],
+                        contextItems = fDoc.createElement('ul');
+                    contextItems.className = 'ff-items';
+                    //For each category items
+                    for (var name in cItem) {
+                        if (cItem.hasOwnProperty(name)) {
+                            //Get item & create it
+                            var itemClick = cItem[name],
+                                contextItem = fDoc.createElement('li');
+                            contextItem.innerText = name;
+                            contextItem.addEventListener('click', itemClick);
+                            //Add it to category
+                            contextItems.appendChild(contextItem);
+                        }
+                    }
+                    //Add it to context menu
+                    contextMenu.appendChild(contextItems);
                 }
-                contextMenu.style.display = visible ? 'block' : 'none';
+
+                //Add context menu
+                fBody.appendChild(contextMenu);
+
+                //Context menu trigger
+                function _contextMenu(visible, coords) {
+                    if (visible && coords) {
+                        contextMenu.style.left = coords.left + 'px';
+                        contextMenu.style.top = coords.top + 'px';
+                    }
+                    contextMenu.style.display = visible ? 'block' : 'none';
+                }
+
+
+                fDoc.addEventListener('contextmenu', function (e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    _contextMenu(true, {
+                        left: e.clientX,
+                        top: e.clientY
+                    });
+                }, false);
+
             }
 
+            /** EVENTS **/
+            fDoc.addEventListener('mousemove', _handleMove);
+            fDoc.addEventListener('click', _handleClick);
+            window.addEventListener('scroll', _handleMove);
+            window.ffSelectionModeHandler = _handleMove;
 
-            fDoc.addEventListener('contextmenu', function (e) {
-                e.preventDefault();
-                e.stopPropagation();
-                _contextMenu(true, {
-                    left: e.clientX,
-                    top: e.clientY
-                });
-            }, false);
+        }, 1);
 
-        }
-
-        /** EVENTS **/
-        fDoc.addEventListener('mousemove', _handleMove);
-        fDoc.addEventListener('click', _handleClick);
-        window.addEventListener('scroll', _handleMove);
-        window.ffSelectionModeHandler = _handleMove;
+        return true;
 
     }
 
     /**
      * Disable selection mode
      * @param targetDocument
+     * @returns {boolean}
      * @private
      */
     function _selection_mode_disable(targetDocument) {
@@ -767,83 +780,99 @@ var DOM_UTILS = (function () {
             delete window.ffSelectionModeHandler;
             //Delete it
             targetDocument.body.removeChild(selectionFrame);
+            //OK
+            return true;
         }
+        return false;
     }
 
     /**
      * Get shadowed frame (style & scope isolation)
+     * @param stylesheets
+     * @param scripts
+     * @param injected
      * @returns {*}
      * @private
      */
-    function _shadow(stylesheets, scripts) {
+    function _shadow(stylesheets, scripts, injected) {
 
         //Check exists
-        if (document.getElementById('ff-shadow-frame')) return null;
+        if (document.getElementById('ff-shadow-frame')) return false;
 
         //Create frame shadow
         var shadowFrame = document.createElement('iframe');
         shadowFrame.id = 'ff-shadow-frame';
+
         //Avoid flickering
         shadowFrame.style.display = 'none';
         document.body.appendChild(shadowFrame);
 
-        //Get document & head
-        var shadowDoc = shadowFrame.contentWindow.document,
-            shadowHead = shadowDoc.head;
+        //FF/IE FIX => Timeout hack to prevent content from being cleared when <iframe> is inserted
+        setTimeout(function () {
 
-        //Stylesheets & scripts
-        function _process_sheet(type, srcFile) {
-            //Get associated relations
-            var concreteSourceRef = (type === 'text/javascript' ? 'src' : 'href'),
-                concreteTag = (type === 'text/javascript' ? 'script' : 'link');
-            //Instance
-            var sheetTag = shadowDoc.createElement(concreteTag);
-            if (type === 'text/css') sheetTag.setAttribute('rel', 'stylesheet');
-            sheetTag.setAttribute('type', type);
-            sheetTag.setAttribute(concreteSourceRef, srcFile);
-            //On load | error handler
-            sheetTag.onload = _shadowExtResLoaded;
-            sheetTag.onerror = _shadowExtResLoaded;
-            //Add it
-            shadowHead.appendChild(sheetTag);
-        }
+            //Get document & head
+            var shadowDoc = shadowFrame.contentWindow.document,
+                shadowHead = shadowDoc.head;
 
-        //Total resources to load
-        var totalRes = 0, resLoaded = 0;
-
-        //_triggered when an external resource has been loaded
-        function _shadowExtResLoaded() {
-            resLoaded++;
-            if (resLoaded >= totalRes) {
-                requestAnimationFrame(function () {
-                    //Undo flickering prevention
-                    shadowFrame.style.display = '';
-                    shadowFrame.className = 'ff-overlay';
-                });
+            //Stylesheets & scripts
+            function _process_sheet(type, srcFile) {
+                //Get associated relations
+                var concreteSourceRef = (type === 'text/javascript' ? 'src' : 'href'),
+                    concreteTag = (type === 'text/javascript' ? 'script' : 'link');
+                //Instance
+                var sheetTag = shadowDoc.createElement(concreteTag);
+                if (type === 'text/css') sheetTag.setAttribute('rel', 'stylesheet');
+                sheetTag.setAttribute('type', type);
+                sheetTag.setAttribute(concreteSourceRef, srcFile);
+                //On load | error handler
+                sheetTag.onload = _shadowExtResLoaded;
+                sheetTag.onerror = _shadowExtResLoaded;
+                //Add it
+                shadowHead.appendChild(sheetTag);
             }
-        }
 
-        //For each sheet
-        var sheets = [], atIScripts, cSheetType = 'text/css';
-        if (stylesheets) sheets = sheets.concat(stylesheets);
-        atIScripts = sheets.length;
-        if (scripts) sheets = sheets.concat(scripts);
-        totalRes = sheets.length;
-        if (totalRes > 0) {
-            for (var s = 0; s < totalRes; ++s) {
-                if (s >= atIScripts) cSheetType = 'text/javascript';
-                _process_sheet(cSheetType, sheets[s]);
+            //Total resources to load
+            var totalRes = 0, resLoaded = 0;
+
+            //_triggered when an external resource has been loaded
+            function _shadowExtResLoaded() {
+                resLoaded++;
+                if (resLoaded >= totalRes) {
+                    requestAnimationFrame(function () {
+                        //Undo flickering prevention
+                        shadowFrame.style.display = '';
+                        shadowFrame.className = 'ff-overlay';
+                    });
+                }
             }
-        } else {
-            _shadowExtResLoaded();
-        }
+
+            //For each sheet
+            var sheets = [], atIScripts, cSheetType = 'text/css';
+            if (stylesheets) sheets = sheets.concat(stylesheets);
+            atIScripts = sheets.length;
+            if (scripts) sheets = sheets.concat(scripts);
+            totalRes = sheets.length;
+            if (totalRes > 0) {
+                for (var s = 0; s < totalRes; ++s) {
+                    if (s >= atIScripts) cSheetType = 'text/javascript';
+                    _process_sheet(cSheetType, sheets[s]);
+                }
+            } else {
+                _shadowExtResLoaded();
+            }
+
+            //Injected callback
+            injected(shadowDoc);
+
+        }, 1);
 
         return {
-            document: shadowDoc,
+            document: shadowFrame.contentWindow.document,
             destroy: function () {
                 if (document.body.contains(shadowFrame)) document.body.removeChild(shadowFrame);
             }
-        }
+        };
+
     }
 
     /**

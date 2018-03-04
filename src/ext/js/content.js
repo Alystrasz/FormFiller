@@ -68,93 +68,97 @@ function _selection_mode_enable() {
         IO.url('src/ext/css/frame.css'),
         IO.url('src/ext/css/layouts.css'),
         IO.url('src/ext/css/buttons.css')
-    ]);
+    ], null, function (document) {
 
-    //Replace document scope
-    var document = CONTENT_VARS.shadowRoot.document;
+        //NOTE : document is replaced in that scope
 
-    //Init context menu items
-    var contextMenuItems = [],
-        contextMenuFormsItems = {};
-    //Cancel
-    contextMenuItems.push({
-        Annuler: _selection_mode_disable
-    });
-    //Forms
-    for (var f = 0; f < formsLen; ++f) {
-        //Closure mutation
-        (function () {
-            //Display forms in popup
-            var form = forms[f].form;
-            contextMenuFormsItems['Formulaire ' + (f + 1)] = function () {
-                DOM_UTILS.scroll_to(form.getBoundingClientRect(), 250);
-            }
-        }());
-    }
-    contextMenuItems.push(contextMenuFormsItems);
-
-    //Enable selection mode
-    DOM_UTILS.selection_mode(document, function (element) {
-        //DEBUG
-        //FormFillerLog.log('Hovered', element);
-    }, function (element) {
-
-        //NOTE : element is type of form
-        FormFillerLog.log('Selected', element);
-
-        //Retrieve associated form fields
-        var associatedFieldsModel;
-        for (var f = 0; f < formsLen && !associatedFieldsModel; ++f) {
-            //Current form
-            var cForm = forms[f];
-            //Check form & get it's fields
-            if (cForm.form === element) associatedFieldsModel = cForm.fields;
+        //Init context menu items
+        var contextMenuItems = [],
+            contextMenuFormsItems = {};
+        //Cancel
+        contextMenuItems.push({
+            Annuler: _selection_mode_disable
+        });
+        //Forms
+        for (var f = 0; f < formsLen; ++f) {
+            //Closure mutation
+            (function () {
+                //Display forms in popup
+                var form = forms[f].form;
+                contextMenuFormsItems['Formulaire ' + (f + 1)] = function () {
+                    DOM_UTILS.scroll_to(form.getBoundingClientRect(), 250);
+                }
+            }());
         }
+        contextMenuItems.push(contextMenuFormsItems);
 
-        //If found
-        if (associatedFieldsModel) {
-
-            //Get model & user template
-            var fieldsModel = DOM_UTILS.fields_model(element, associatedFieldsModel),
-                fieldsTemplate = DOM_UTILS.fields_template(fieldsModel);
-
+        //Enable selection mode
+        DOM_UTILS.selection_mode(document, function (element) {
             //DEBUG
-            console.log('Application model', fieldsModel);
-            console.log('User model', fieldsTemplate);
+            //FormFillerLog.log('Hovered', element);
+        }, function (element) {
 
-            //Instance fields selection popup
-            var fieldsPopupSelection = DOM_UTILS.fields_popup(document, fieldsModel, fieldsTemplate);
+            //NOTE : element is type of form
+            FormFillerLog.log('Selected', element);
 
-            //Open fields selection
-            fieldsPopupSelection.open(function (fieldsModel, fieldsTemplate) {
+            //Retrieve associated form fields
+            var associatedFieldsModel;
+            for (var f = 0; f < formsLen && !associatedFieldsModel; ++f) {
+                //Current form
+                var cForm = forms[f];
+                //Check form & get it's fields
+                if (cForm.form === element) associatedFieldsModel = cForm.fields;
+            }
+
+            //If found
+            if (associatedFieldsModel) {
+
+                //Get model & user template
+                var fieldsModel = DOM_UTILS.fields_model(element, associatedFieldsModel),
+                    fieldsTemplate = DOM_UTILS.fields_template(fieldsModel);
+
                 //DEBUG
-                FormFillerLog.log('Serving template', fieldsTemplate);
-                //Storing form model into storage
-                console.log(STORAGE_UTILS.model_save(window.location.hostname, fieldsModel.uuid, fieldsModel));
-                //Download it
-                IO.download(window.location.hostname + '-' + fieldsModel.uuid, fieldsTemplate, IO.FTYPES.JSON);
-                //Remove fields popup
-                fieldsPopupSelection.destroy();
+                console.log('Application model', fieldsModel);
+                console.log('User model', fieldsTemplate);
+
+                //Instance fields selection popup
+                var fieldsPopupSelection = DOM_UTILS.fields_popup(document, fieldsModel, fieldsTemplate);
+
+                //Open fields selection
+                fieldsPopupSelection.open(function (fieldsModel, fieldsTemplate) {
+                    //DEBUG
+                    FormFillerLog.log('Serving template', fieldsTemplate);
+                    //Storing form model into storage
+                    console.log(STORAGE_UTILS.model_save(window.location.hostname, fieldsModel.uuid, fieldsModel));
+                    //Download it
+                    IO.download(window.location.hostname + '-' + fieldsModel.uuid, fieldsTemplate, IO.FTYPES.JSON);
+                    //Remove fields popup
+                    fieldsPopupSelection.destroy();
+                    //End selection mode
+                    _selection_mode_disable();
+                }, function () {
+                    //Remove fields popup
+                    fieldsPopupSelection.destroy();
+                });
+
+            } else {
                 //End selection mode
                 _selection_mode_disable();
-            }, function () {
-                //Remove fields popup
-                fieldsPopupSelection.destroy();
-            });
+                //Error display
+                alert('Erreur interne : récupération des champs impossible');
+            }
 
-        } else {
-            alert('Erreur interne : récupération des champs impossible');
-        }
+        }, function (element) {
+            //Check if element is in form or if it's the form itself
+            for (var f = 0; f < formsLen; ++f) {
+                var cForm = forms[f];
+                if ((cForm.form === element)
+                    || cForm.form.contains(element)) return cForm.form;
+            }
+            return null;
+        }, contextMenuItems);
 
-    }, function (element) {
-        //Check if element is in form or if it's the form itself
-        for (var f = 0; f < formsLen; ++f) {
-            var cForm = forms[f];
-            if ((cForm.form === element)
-                || cForm.form.contains(element)) return cForm.form;
-        }
-        return null;
-    }, contextMenuItems);
+    });
 }
 
 /**
