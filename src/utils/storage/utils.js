@@ -87,11 +87,12 @@ var STORAGE_UTILS = (function () {
     /**
      * Save given model
      * @param domain
+     * @param title
      * @param uuid
      * @param model
      * @private
      */
-    function _model_save(domain, uuid, model) {
+    function _model_save(domain, title, uuid, model) {
         //Get given domain structure
         var domainStruct = _get(domain);
         //Create or retrieve
@@ -99,7 +100,10 @@ var STORAGE_UTILS = (function () {
             domainStruct = {};
         }
         //Add
-        domainStruct[uuid] = model;
+        domainStruct[uuid] = {
+            title: title,
+            model: model
+        };
         //Save
         return _set(domain, domainStruct);
     }
@@ -122,14 +126,17 @@ var STORAGE_UTILS = (function () {
 
 
     var exports = {
-        model_save: function (domain, uuid, model) {
-            return _model_save(domain, uuid, model)
+        model_save: function (domain, pageTitle, uuid, model) {
+            return _model_save(domain, pageTitle, uuid, model)
         },
         model_load: function (domain, uuid) {
             return _model_load(domain, uuid);
         },
         all: function () {
             return JSON.parse(_namespace_get());
+        },
+        format: function () {
+            return _namespace_update({});
         }
     };
 

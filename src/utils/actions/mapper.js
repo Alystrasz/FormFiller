@@ -14,10 +14,16 @@ var ACTIONS_MAPPER = (function () {
         } else return false;
     }
 
-    function _process(messageStruct) {
+    function _process(messageStruct, from) {
         var acFunc = _getActionFunction(messageStruct);
         if (acFunc) {
-            return acFunc.apply(null, messageStruct.arguments);
+            return acFunc.apply({
+                sendResponse: function (object) {
+                    if (MESSAGE_HANDLER) {
+                        MESSAGE_HANDLER.send(from, object, (from === 'CONTENT_SCRIPT'));
+                    }
+                }
+            }, messageStruct.arguments);
         }
         return false;
     }

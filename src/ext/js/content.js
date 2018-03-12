@@ -1,6 +1,8 @@
 //Init vars
 var CONTENT_VARS = {
     importDialog: IO.fileDialog(),
+    pageTitle: document.title,
+    pageDomain: window.location.hostname || 'localhost',
     shadowRoot: null
 };
 
@@ -9,9 +11,9 @@ var MESSAGE_HANDLER = BROWSER_UTILS.MESSAGE.register('CONTENT_SCRIPT');
 
 //*** ACTIONS MAP***//
 ACTIONS_MAPPER.map('import_template', _action_template_import);
-ACTIONS_MAPPER.map('models_get', _action_models_get);
 ACTIONS_MAPPER.map('selection_mode_enable', _selection_mode_enable);
 ACTIONS_MAPPER.map('selection_mode_disable', _selection_mode_disable);
+ACTIONS_MAPPER.map('model_load', _form_fill_load);
 
 //From : BACKGROUND
 MESSAGE_HANDLER.from('BACKGROUND', ACTIONS_MAPPER.process);
@@ -34,17 +36,6 @@ function _action_template_import() {
             _form_fill(PARSING.parse(ext, data));
         });
     }
-}
-
-/**
- * ACTION : get models
- * NOTE : localStorage is working with domain name (popup hasn't the same domain)
- * @private
- */
-function _action_models_get() {
-    //TODO : CENTRALISER LES MODELES DANS LA POPUP OU DANS LE BACKGROUND 
-    //Send models back
-    MESSAGE_HANDLER.send('POPUP', ACTIONS_MAPPER.build('saved_models', [STORAGE_UTILS.all()]));
 }
 
 /**
@@ -129,7 +120,7 @@ function _selection_mode_enable() {
                     //DEBUG
                     FormFillerLog.log('Serving template', fieldsTemplate);
                     //Storing form model into storage
-                    console.log(STORAGE_UTILS.model_save(window.location.hostname, fieldsModel.uuid, fieldsModel));
+                    MESSAGE_HANDLER.send('BACKGROUND', ACTIONS_MAPPER.build('save_model', [CONTENT_VARS.pageDomain, CONTENT_VARS.pageTitle, fieldsModel.uuid, fieldsModel]));
                     //Download it
                     IO.download(window.location.hostname + '-' + fieldsModel.uuid, fieldsTemplate, IO.FTYPES.JSON);
                     //Remove fields popup
@@ -186,33 +177,46 @@ function _selection_mode_disable() {
 function _form_fill(userTemplate) {
     //Get template
     if (userTemplate) {
-        //Check associated form
-        var associatedFormModel;
         //DEBUG
         FormFillerLog.log('Trying to load form UUID => ' + userTemplate.associatedForm);
         //Check associated form of template & storage association
-        if (userTemplate.associatedForm && (associatedFormModel = STORAGE_UTILS.model_load(window.location.hostname, userTemplate.associatedForm))) {
-            //Get fields to fill & user fields
-            var associatedFormFields = associatedFormModel.fields,
-                userFields = userTemplate.data;
-            for (var fieldName in associatedFormFields) {
-                //Check property
-                if (associatedFormFields.hasOwnProperty(fieldName)) {
-                    //Get current field & user associated data
-                    var currentField = associatedFormFields[fieldName],
-                        userFieldData = userFields[fieldName];
-                    //If not undefined
-                    if (userFieldData !== undefined) {
-                        //DEBUG
-                        FormFillerLog.log('Filling [' + fieldName + '] with data => ' + userFieldData);
-                        //Fill field with user data
-                        DOM_UTILS.field_value_set(DOM_UTILS.fromXPath(currentField.xpath), currentField.type, userFieldData);
-                    }
+        if (userTemplate.associatedForm) {
+            //Request associated form model (with domain and associatedForm, aka UUID)
+            MESSAGE_HANDLER.send('BACKGROUND', ACTIONS_MAPPER.build('get_model', [CONTENT_VARS.pageDomain, userTemplate.associatedForm, userTemplate]));
+        } else {
+            alert("Erreur lors de la lecture du fichier !");
+        }
+    }
+}
+
+/**
+ * ACTION : _form_fill_load
+ * @param associatedFormModel
+ * @param userTemplate
+ * @private
+ */
+function _form_fill_load(associatedFormModel, userTemplate) {
+    //Check associated form model
+    if (associatedFormModel) {
+        //Get fields to fill & user fields
+        var associatedFormFields = associatedFormModel.model.fields,
+            userFields = userTemplate.data;
+        for (var fieldName in associatedFormFields) {
+            //Check property
+            if (associatedFormFields.hasOwnProperty(fieldName)) {
+                //Get current field & user associated data
+                var currentField = associatedFormFields[fieldName],
+                    userFieldData = userFields[fieldName];
+                //If not undefined
+                if (userFieldData !== undefined) {
+                    //DEBUG
+                    FormFillerLog.log('Filling [' + fieldName + '] with data => ' + userFieldData);
+                    //Fill field with user data
+                    DOM_UTILS.field_value_set(DOM_UTILS.fromXPath(currentField.xpath), currentField.type, userFieldData);
                 }
             }
-
-        } else {
-            alert("Impossible de trouver le formulaire associé !");
         }
+    } else {
+        alert('Impossible de retrouver le formulaire associé !');
     }
 }

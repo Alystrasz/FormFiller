@@ -23,6 +23,8 @@
       "src/polyfills/browser-polyfill.min.js",
       "src/utils/browser/utils.js",
       "src/utils/actions/mapper.js",
+      "src/utils/computing/utils.js",
+      "src/utils/storage/utils.js",
       "src/ext/js/background.js"
     ]
   },

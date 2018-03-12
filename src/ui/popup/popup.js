@@ -5,7 +5,7 @@ document.addEventListener('DOMContentLoaded', function () {
     var MESSAGE_HANDLER = BROWSER_UTILS.MESSAGE.register('POPUP');
 
     //Actions map
-    ACTIONS_MAPPER.map('saved_models', _saved_models);
+    ACTIONS_MAPPER.map('saved_models', _display_saved_models);
 
     //From : CONTENT_SCRIPT
     MESSAGE_HANDLER.from('CONTENT_SCRIPT', ACTIONS_MAPPER.process);
@@ -34,9 +34,14 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
     //Get saved models
-    MESSAGE_HANDLER.send('CONTENT_SCRIPT', ACTIONS_MAPPER.build('models_get'), true);
+    MESSAGE_HANDLER.send('BACKGROUND', ACTIONS_MAPPER.build('get_models'));
 
-    function _saved_models(savedModels) {
+    /**
+     * Called to display saved models into popup
+     * @param savedModels
+     * @private
+     */
+    function _display_saved_models(savedModels) {
         var savedModelsDisplay = document.getElementById('savedModels'),
             hasModels = false;
         for (var k in savedModels) {
@@ -65,7 +70,5 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
 
-    function openOptionsPage() {
-        browser.runtime.openOptionsPage();
-    }
+
 });

@@ -52,7 +52,7 @@ var BROWSER_UTILS = (function (namespace) {
     function _message_listen(from, clbk, receiver) {
         namespace.runtime.onMessage.addListener(function (request) {
             if (request.from === from && request.receiver === receiver) {
-                clbk(request.content);
+                clbk(request.content, request.from);
             }
             return new Promise(function () {
             });
