@@ -29,7 +29,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
     //Open settings view
     document.getElementById('open_options').addEventListener('click', function () {
-        console.log('hello');
         browser.runtime.openOptionsPage();
     });
 
@@ -52,19 +51,45 @@ document.addEventListener('DOMContentLoaded', function () {
                 }
                 var domain = document.createElement('div'),
                     name = document.createElement('div'),
-                    count = document.createElement('div');
+                    count = document.createElement('div'),
+                    models = document.createElement('div');
                 domain.className = 'domain';
                 name.className = 'name';
                 count.className = 'count';
+                models.className = 'fmodels';
                 domain.innerText = k;
 
-                var cnt = 0;
-                for (var c in savedModels[k])
-                    if (savedModels[k].hasOwnProperty(c)) cnt++;
+                var cnt = 0, forms = savedModels[k];
+                for (var c in forms) {
+                    if (forms.hasOwnProperty(c)) {
+                        cnt++;
+                        var
+                            fModel = document.createElement('div'),
+                            fTitle = document.createElement('div'),
+                            cForm = forms[c],
+                            cFormTitle = cForm.title,
+                            cFormFields = cForm.model.fields,
+                            fFields = document.createElement('ul');
+                        fModel.className = 'fmodel';
+                        fFields.className = 'fields';
+                        fTitle.className = 'title';
+                        fTitle.innerText = cFormTitle + ' ('+cForm.model.uuid+')';
+                        for (var fName in cFormFields) {
+                            var f = document.createElement('li');
+                            f.innerText = fName;
+                            fFields.appendChild(f);
+                        }
+                        fModel.appendChild(fTitle);
+                        fModel.appendChild(fFields);
+
+                        models.appendChild(fModel);
+                    }
+                }
                 count.innerText = String(cnt);
 
                 domain.appendChild(name);
                 domain.appendChild(count);
+                domain.appendChild(models);
                 savedModelsDisplay.appendChild(domain);
             }
         }

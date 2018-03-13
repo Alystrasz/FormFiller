@@ -44,6 +44,7 @@
         "src/utils/dom/utils.js",
         "src/utils/actions/mapper.js",
         "src/utils/parsing/utils.js",
+        "src/utils/computing/utils.js",
         "src/utils/io/utils.js",
         "src/ext/js/content.js"
       ],
