@@ -41,47 +41,52 @@ document.addEventListener('DOMContentLoaded', function () {
      * @private
      */
     function _display_saved_models(savedModels) {
+        //Get saved models container
         var savedModelsDisplay = document.getElementById('savedModels'),
             hasModels = false;
+        //For each saved models
         for (var k in savedModels) {
+            //Check property key
             if (savedModels.hasOwnProperty(k)) {
+                //Hash models trigger
                 if (!hasModels) {
                     hasModels = true;
                     savedModelsDisplay.innerHTML = '';
                 }
+                //Preparing dom elements
                 var domain = document.createElement('div'),
                     name = document.createElement('div'),
                     count = document.createElement('div'),
                     models = document.createElement('div');
+                //Set domain & name & count
                 domain.className = 'domain';
                 name.className = 'name';
                 count.className = 'count';
                 models.className = 'fmodels';
-                domain.innerText = k;
-
+                name.innerText = k;
+                //For each forms in domain
                 var cnt = 0, forms = savedModels[k];
                 for (var c in forms) {
+                    //Property check
                     if (forms.hasOwnProperty(c)) {
+                        //Forms count
                         cnt++;
+                        //Display forms
                         var
                             fModel = document.createElement('div'),
                             fTitle = document.createElement('div'),
-                            cForm = forms[c],
-                            cFormTitle = cForm.title,
-                            cFormFields = cForm.model.fields,
-                            fFields = document.createElement('ul');
+                            cForm = forms[c];
                         fModel.className = 'fmodel';
-                        fFields.className = 'fields';
                         fTitle.className = 'title';
-                        fTitle.innerText = cFormTitle + ' ('+cForm.model.uuid+')';
-                        for (var fName in cFormFields) {
-                            var f = document.createElement('li');
-                            f.innerText = fName;
-                            fFields.appendChild(f);
-                        }
+                        fTitle.innerText = cForm.title;
+                        //Mutation closure
+                        (function (handledForm) {
+                            //On form title click
+                            fTitle.addEventListener('click', function () {
+                                MESSAGE_HANDLER.send('BACKGROUND', ACTIONS_MAPPER.build('form_open_scroll', [handledForm]));
+                            });
+                        }(cForm));
                         fModel.appendChild(fTitle);
-                        fModel.appendChild(fFields);
-
                         models.appendChild(fModel);
                     }
                 }

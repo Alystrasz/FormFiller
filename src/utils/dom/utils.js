@@ -202,7 +202,7 @@ var DOM_UTILS = (function () {
             //Get options
             return (Array.prototype.slice.call(fieldStruct.element.querySelectorAll('option')).map(function (element) {
                 //Get inner text
-                return element.innerText;
+                return element.innerText.replace(/[\n,\r]/g, '').trim();
             }));
         } else if (fType === 'radio') {
             return false;
@@ -307,6 +307,21 @@ var DOM_UTILS = (function () {
     }
 
     /**
+     * Dispatch given event on element
+     * @param element
+     * @param eventName
+     * @private
+     */
+    function _event_dispatch(element, eventName) {
+        if ("createEvent" in document) {
+            var evt = document.createEvent("HTMLEvents");
+            evt.initEvent(eventName, false, true);
+            element.dispatchEvent(evt);
+        }
+        else element.fireEvent("on" + eventName);
+    }
+
+    /**
      * Set value of given field
      * @param element
      * @param type
@@ -333,7 +348,7 @@ var DOM_UTILS = (function () {
                 for (var o = 0, olen = options.length; o < olen; ++o) {
                     var cOptions = options[o];
                     //If found in value
-                    if (value.indexOf(cOptions.innerText) > -1) {
+                    if (value.indexOf(cOptions.innerText.replace(/[\n,\r]/g, '').trim()) > -1) {
                         //Set selected
                         cOptions.selected = true;
                         //Loop optimization
@@ -342,6 +357,8 @@ var DOM_UTILS = (function () {
                 }
             }
         }
+        //Dispatch change event
+        _event_dispatch(element, 'change');
     }
 
     /**
@@ -459,9 +476,10 @@ var DOM_UTILS = (function () {
      * Scroll dom to given bounds
      * @param bounds
      * @param duration
+     * @param onEnd
      * @private
      */
-    function _dom_scroll_to(bounds, duration) {
+    function _dom_scroll_to(bounds, duration, onEnd) {
         /**
          * Scroll ease in out quad calculation
          * @param t
@@ -495,11 +513,12 @@ var DOM_UTILS = (function () {
 
         //Get vars
         var
-            // Calculate how far to scroll
-            stopY = Math.max(0, (bounds.top - (window.innerHeight) / 2) + bounds.height),
-            stopX = Math.max(0, (bounds.left - (window.innerWidth + bounds.width) / 2)),
-            // Cache starting position
+            //Get scroll position
             scrollPosition = _scroll_position(),
+            // Calculate how far to scroll
+            stopY = Math.max(0, ((bounds.top + scrollPosition.top) - (window.innerHeight) / 2) + bounds.height),
+            stopX = Math.max(0, ((bounds.left + scrollPosition.left) - (window.innerWidth + bounds.width) / 2)),
+            // Cache starting position
             startY = scrollPosition.top,
             startX = scrollPosition.left,
             distanceX = stopX - startX,
@@ -533,6 +552,8 @@ var DOM_UTILS = (function () {
                 _dom_scroll_abort();
                 // Account for rAF time rounding inaccuracies
                 window.scrollTo(startX + distanceX, startY + distanceY);
+                //Triggering onEnd clbk
+                if (onEnd) onEnd();
                 // Reset time for next jump
                 timeStart = null;
             }

@@ -58,8 +58,8 @@ body {
     color: #707070;
 }
 
-.models .domain {
 
+.models .domain {
     display: block;
     margin: 5px 0;
     background: rgba(0, 0, 0, 0.65);
@@ -102,7 +102,7 @@ body {
                         <div class="fields">
                             <ul class="field">
                                 <li>Nom</li>
-                                <li>Prénom</li>
+                                <li>Prï¿½nom</li>
                                 <li>Mail</li>
                             </ul>
                         </div>
@@ -117,10 +117,12 @@ body {
 
 .models .domain .fmodels .fmodel {
     overflow: hidden;
+    margin-top: 5px;
 }
 
 .models .domain .fmodels .fmodel .title{
-    margin-top: 5px;
+    display: block;
+    cursor: pointer;
 }
 .models .domain .fmodels .fmodel .title:before{
     display:inline-block;

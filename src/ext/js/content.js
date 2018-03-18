@@ -44,6 +44,9 @@ function _action_template_import() {
  */
 function _selection_mode_enable() {
 
+    //Check in selection
+    if (CONTENT_VARS.shadowRoot) return false;
+
     //Get forms
     var forms = DOM_UTILS.forms(true), formsLen = forms.length;
 
@@ -119,8 +122,10 @@ function _selection_mode_enable() {
                 fieldsPopupSelection.open(function (fieldsModel, fieldsTemplate) {
                     //DEBUG
                     FormFillerLog.log('Serving template', fieldsTemplate);
+                    //Custom title ?
+                    var fTitle = prompt("Veuillez choisir un titre pour ce formulaire", CONTENT_VARS.pageTitle) || CONTENT_VARS.pageTitle;
                     //Storing form model into storage
-                    MESSAGE_HANDLER.send('BACKGROUND', ACTIONS_MAPPER.build('save_model', [CONTENT_VARS.pageDomain, CONTENT_VARS.pageTitle, fieldsModel.uuid, fieldsModel]));
+                    MESSAGE_HANDLER.send('BACKGROUND', ACTIONS_MAPPER.build('save_model', [CONTENT_VARS.pageDomain, fTitle, fieldsModel.uuid, fieldsModel]));
                     //Download it
                     IO.download(window.location.hostname + '-' + fieldsModel.uuid, fieldsTemplate, IO.FTYPES.JSON);
                     //Remove fields popup

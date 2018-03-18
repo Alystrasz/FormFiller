@@ -2,6 +2,8 @@ var STORAGE_UTILS = (function () {
 
     var
         STORAGE_NAMESPACE = COMPUTING.md5('FF-STORAGE'),
+        STORAGE_MODELS_DOMAIN = COMPUTING.md5('FF-MODELS'),
+        STORAGE_CONFIG_DOMAIN = COMPUTING.md5('FF-CONFIG'),
         STORAGE_TEST_KEY = '2971344b-1076-4f31-8818-d67fbf22213f';
 
     /**
@@ -69,22 +71,6 @@ var STORAGE_UTILS = (function () {
     }
 
     /**
-     * Remove given key storage
-     * @param key
-     * @returns {boolean}
-     * @private
-     */
-    function _remove(key) {
-        var structure = _namespace_get();
-        if (structure) {
-            delete structure[key];
-            _namespace_update(structure);
-            return true;
-        }
-        return false;
-    }
-
-    /**
      * Save given model
      * @param domain
      * @param title
@@ -93,19 +79,17 @@ var STORAGE_UTILS = (function () {
      * @private
      */
     function _model_save(domain, title, uuid, model) {
-        //Get given domain structure
-        var domainStruct = _get(domain);
-        //Create or retrieve
-        if (!domainStruct) {
-            domainStruct = {};
-        }
+        //Get models structure
+        var models = _get(STORAGE_MODELS_DOMAIN) || {};
+        //Init or retrieve
+        models[domain] = models[domain] || {};
         //Add
-        domainStruct[uuid] = {
+        models[domain][uuid] = {
             title: title,
             model: model
         };
         //Save
-        return _set(domain, domainStruct);
+        return _set(STORAGE_MODELS_DOMAIN, models);
     }
 
     /**
@@ -116,27 +100,88 @@ var STORAGE_UTILS = (function () {
      * @private
      */
     function _model_load(domain, uuid) {
-        //Get given domain structure
-        var domainStruct = _get(domain);
-        //Create or retrieve
-        if (domainStruct) {
-            return domainStruct[uuid];
-        } else return null;
+        //Get models structure
+        var models = _get(STORAGE_MODELS_DOMAIN) || {},
+            //Get given domain structure
+            domainStruct = models[domain] || {};
+        //Return it
+        return domainStruct[uuid];
     }
 
+    /**
+     * Return all saved models
+     * @returns {*|{}}
+     * @private
+     */
+    function _models(){
+        return _get(STORAGE_MODELS_DOMAIN) || {};
+    }
+
+    /**
+     * Get given config key
+     * @param key
+     * @returns {*}
+     * @private
+     */
+    function _config_get(key) {
+        //Get config structure
+        var configStruct = _get(STORAGE_CONFIG_DOMAIN) || {};
+        //Return it
+        return configStruct[key]
+    }
+
+    /**
+     * Set given config key<>value
+     * @param key
+     * @param value
+     * @returns {boolean}
+     * @private
+     */
+    function _config_set(key, value) {
+        //Get config structure
+        var configStruct = _get(STORAGE_CONFIG_DOMAIN) || {};
+        //Add key value
+        configStruct[key] = value;
+        //Save
+        return _set(STORAGE_CONFIG_DOMAIN, configStruct);
+    }
+
+    /**
+     * Remove given config key
+     * @param key
+     * @returns {boolean}
+     * @private
+     */
+    function _config_remove(key) {
+        //Get config structure
+        var configStruct = _get(STORAGE_CONFIG_DOMAIN) || {};
+        //Erase key
+        delete configStruct[key];
+        //Save
+        return _set(STORAGE_CONFIG_DOMAIN, configStruct);
+    }
 
     var exports = {
-        model_save: function (domain, pageTitle, uuid, model) {
-            return _model_save(domain, pageTitle, uuid, model)
+        model_save: function (domain, modelTitle, uuid, model) {
+            return _model_save(domain, modelTitle, uuid, model)
         },
         model_load: function (domain, uuid) {
             return _model_load(domain, uuid);
         },
-        all: function () {
-            return JSON.parse(_namespace_get());
+        models: function () {
+            return _models();
         },
         format: function () {
             return _namespace_update({});
+        },
+        config_set: function (key, value) {
+            return _config_set(key, value);
+        },
+        config_get: function (key) {
+            return _config_get(key);
+        },
+        config_remove: function (key) {
+            return _config_remove(key);
         }
     };
 

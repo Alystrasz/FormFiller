@@ -14,7 +14,8 @@
   },
   "permissions": [
     "activeTab",
-    "storage"
+    "storage",
+    "<all_urls>"
   ],
   "background": {
     "scripts": [
@@ -56,6 +57,8 @@
     "src/ext/css/frame.css",
     "src/ext/css/buttons.css",
     "src/ext/css/selection.css",
-    "src/ext/css/context-menu.css"
+    "src/ext/css/context-menu.css",
+    "src/ext/js/shared/form_focus.js",
+    "src/utils/dom/utils.js"
   ]
 }
