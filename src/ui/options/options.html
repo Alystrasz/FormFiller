@@ -13,23 +13,30 @@
         <ul class="preferences">
             <li class="container">
                 <label class="container">Exporter tous les champs par défaut
-                    <input type="checkbox" checked="checked">
+                    <input type="checkbox" id="exportAllInputsBox">
                     <span class="checkmark"></span>
                 </label>
             </li>
             <li>
                 <label class="container">Exporter les champs cachés
-                    <input type="checkbox" checked="checked">
+                    <input type="checkbox" id="exportHiddenInputsBox">
                     <span class="checkmark"></span>
                 </label>
             </li>
             <li class="container">Langue :
-                <select id="langSelect">
+                <select id="langSelector">
                     <option value="fr" selected>Français</option>
                     <option value="en">Anglais</option>
                 </select>
             </li>
         </ul>
     </body>
+
+    <footer>
+        <script type="text/javascript" src="options.js"></script>
+        <script type="text/javascript" src="../../polyfills/browser-polyfill.min.js"></script>
+        <script type="text/javascript" src="../../utils/computing/utils.js"></script>
+        <script type="text/javascript" src="../../utils/storage/utils.js"></script>
+    </footer>
 
 </html>
