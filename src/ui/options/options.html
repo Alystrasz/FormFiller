@@ -10,11 +10,25 @@
     <body>
         <h1>Form Filler: preferences</h1>
         <hr/>
-        <ul>
-            <li>option1</li>
-            <li>option2</li>
-            <li>option3</li>
-            <li>option4</li>
+        <ul class="preferences">
+            <li class="container">
+                <label class="container">Exporter tous les champs par défaut
+                    <input type="checkbox" checked="checked">
+                    <span class="checkmark"></span>
+                </label>
+            </li>
+            <li>
+                <label class="container">Exporter les champs cachés
+                    <input type="checkbox" checked="checked">
+                    <span class="checkmark"></span>
+                </label>
+            </li>
+            <li class="container">Langue :
+                <select id="langSelect">
+                    <option value="fr" selected>Français</option>
+                    <option value="en">Anglais</option>
+                </select>
+            </li>
         </ul>
     </body>
 
