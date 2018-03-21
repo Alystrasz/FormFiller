@@ -927,6 +927,8 @@ var DOM_UTILS = (function () {
 
             checkbox.value = name;
             checkbox.type = 'checkbox';
+            checkbox.setAttribute('checked', 'true');
+
             label.innerText = name;
             label.insertBefore(checkbox, label.firstChild);
 
