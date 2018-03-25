@@ -917,6 +917,10 @@ var DOM_UTILS = (function () {
         fPopup.className = 'ff-popup';
         fPopup.innerHTML = '<h4 style="margin-top: 0">Veuillez choisir les champs à exporter</h4>';
 
+        //Get user preference
+        //TODO
+
+
         //For each field
         for (var name in fieldsModel.fields) {
             //Display field as checkbox

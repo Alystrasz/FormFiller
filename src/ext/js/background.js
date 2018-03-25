@@ -10,6 +10,31 @@ ACTIONS_MAPPER.map('form_open_scroll', _form_open_scroll);
 //From : POPUP
 MESSAGE_HANDLER.from('POPUP', ACTIONS_MAPPER.process);
 
+//From : OPTIONS PAGE
+MESSAGE_HANDLER.from('OPTIONS', function(data) {
+    switch (data.op) {
+        case 'get_user_settings':
+            var options = {
+                export_all_fields: STORAGE_UTILS.config_get('export_all_fields'),
+                export_hidden_fields: STORAGE_UTILS.config_get('export_hidden_fields'),
+                language: STORAGE_UTILS.config_get('language')
+            };
+            MESSAGE_HANDLER.send('OPTIONS', options, false);
+            break;
+
+        case 'save_user_settings':
+            console.log(data);
+            STORAGE_UTILS.config_set('export_all_fields', data.settings['export_all_fields']);
+            STORAGE_UTILS.config_set('export_hidden_fields', data.settings['export_hidden_fields']);
+            STORAGE_UTILS.config_set('language', data.settings['language']);
+            break;
+
+        default:
+            break;
+
+    }
+})
+
 //From : CONTENT_SCRIPT
 MESSAGE_HANDLER.from('CONTENT_SCRIPT', ACTIONS_MAPPER.process);
 
