@@ -31,11 +31,33 @@ var IO = (function () {
             ext = '.yaml';
         }
         link.setAttribute('download', filename + ext);
+        console.log(link);
         // Adding the link
         document.body.appendChild(link);
         link.click();
         // Removing the link
         document.body.removeChild(link);
+    }
+
+    function _trigger_download_via_browser_API(filename, data, optType) {
+        // Setting up the link & type
+        var type = optType || IO.FTYPES.JSON;
+        if (Blob !== undefined) {
+            var blob = new Blob([JSON.stringify(data, null, 2)], {type: type});
+        } else {
+            console.err('Blob not defined');
+            return ;
+        }
+        var ext = '';
+        if(type === IO.FTYPES.JSON){
+            ext = '.json';
+        }else if(type === IO.FTYPES.YAML){
+            ext = '.yaml';
+        }
+
+        var downloading = browser.downloads.download({
+            url: URL.createObjectURL(blob)
+        })
     }
 
 
