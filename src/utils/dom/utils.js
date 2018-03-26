@@ -917,8 +917,7 @@ var DOM_UTILS = (function () {
         fOverlay.id = 'ff-fields-popup-container';
         fPopup.className = 'ff-popup';
         fPopup.innerHTML = '<h4 style="margin-top: 0">Veuillez choisir les champs à exporter</h4>';
-
-        console.log('tout check: ' + checkAll)
+        
         //For each field
         for (var name in fieldsModel.fields) {
             //Display field as checkbox

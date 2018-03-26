@@ -118,25 +118,17 @@ function _selection_mode_enable() {
                 console.log('Application model', fieldsModel);
                 console.log('User model', fieldsTemplate);
 
-                //Get user preference
-                // console.log('calling bg')
-                // MESSAGE_HANDLER.send('BACKGROUND', ACTIONS_MAPPER.build('import_settings', []));
-
                 /**
                  * Modal params callback (get from storage <=> background)
-                 * @param allFieldsSelected
+                 * @param settings
                  */
                 function internalModalParamsClbk(settings) {
 
-                    var checkBoxes = settings['export_all_fields'];
-                    if(!checkBoxes)
-                        checkBoxes = false;
-
                     //Prevent further calls to params clbk (in that scope)
-                    ACTIONS_MAPPER.map('fields_modal_params_response', null);
+                    ACTIONS_MAPPER.map('import_settings', null);
 
                     //Instance fields selection popup
-                    var fieldsPopupSelection = DOM_UTILS.fields_popup(document, fieldsModel, fieldsTemplate, checkBoxes);
+                    var fieldsPopupSelection = DOM_UTILS.fields_popup(document, fieldsModel, fieldsTemplate, settings['export_all_fields'] || false);
 
                     //Open fields selection
                     fieldsPopupSelection.open(function (fieldsModel, fieldsTemplate) {
