@@ -6,6 +6,7 @@ ACTIONS_MAPPER.map('get_models', _get_models);
 ACTIONS_MAPPER.map('get_model', _get_model);
 ACTIONS_MAPPER.map('save_model', _save_model);
 ACTIONS_MAPPER.map('form_open_scroll', _form_open_scroll);
+ACTIONS_MAPPER.map('import_settings', _send_settings);
 
 //From : POPUP
 MESSAGE_HANDLER.from('POPUP', ACTIONS_MAPPER.process);
@@ -30,13 +31,13 @@ MESSAGE_HANDLER.from('OPTIONS', function(data) {
     }
 })
 
-MESSAGE_HANDLER.from('DOMU', function(e) {
-    MESSAGE_HANDLER.send('DOMU', _get_user_settings(), true);
-});
-
 //From : CONTENT_SCRIPT
 MESSAGE_HANDLER.from('CONTENT_SCRIPT', ACTIONS_MAPPER.process);
 
+function _send_settings(fieldsModel, fieldsTemplate) {
+    this.sendResponse(ACTIONS_MAPPER.build('import_settings',
+        [_get_user_settings()]));
+}
 /**
  * ACTION : get model with given args
  * @param pageDomain

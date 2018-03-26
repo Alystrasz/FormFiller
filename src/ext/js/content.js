@@ -6,6 +6,8 @@ var CONTENT_VARS = {
     shadowRoot: null
 };
 
+var fieldsModel, fieldsTemplate, doc;
+
 //Init message handler
 var MESSAGE_HANDLER = BROWSER_UTILS.MESSAGE.register('CONTENT_SCRIPT');
 
@@ -20,7 +22,6 @@ MESSAGE_HANDLER.from('BACKGROUND', ACTIONS_MAPPER.process);
 
 //From : POPUP
 MESSAGE_HANDLER.from('POPUP', ACTIONS_MAPPER.process);
-
 
 /**
  * ACTION : import file
@@ -92,6 +93,8 @@ function _selection_mode_enable() {
             //FormFillerLog.log('Hovered', element);
         }, function (element) {
 
+            doc = document;
+
             //NOTE : element is type of form
             FormFillerLog.log('Selected', element);
 
@@ -115,27 +118,53 @@ function _selection_mode_enable() {
                 console.log('Application model', fieldsModel);
                 console.log('User model', fieldsTemplate);
 
-                //Instance fields selection popup
-                var fieldsPopupSelection = DOM_UTILS.fields_popup(document, fieldsModel, fieldsTemplate);
+                //Get user preference
+                // console.log('calling bg')
+                // MESSAGE_HANDLER.send('BACKGROUND', ACTIONS_MAPPER.build('import_settings', []));
 
-                //Open fields selection
-                fieldsPopupSelection.open(function (fieldsModel, fieldsTemplate) {
-                    //DEBUG
-                    FormFillerLog.log('Serving template', fieldsTemplate);
-                    //Custom title ?
-                    var fTitle = prompt("Veuillez choisir un titre pour ce formulaire", CONTENT_VARS.pageTitle) || CONTENT_VARS.pageTitle;
-                    //Storing form model into storage
-                    MESSAGE_HANDLER.send('BACKGROUND', ACTIONS_MAPPER.build('save_model', [CONTENT_VARS.pageDomain, fTitle, fieldsModel.uuid, fieldsModel]));
-                    //Download it
-                    IO.download(window.location.hostname + '-' + fieldsModel.uuid, fieldsTemplate, IO.FTYPES.JSON);
-                    //Remove fields popup
-                    fieldsPopupSelection.destroy();
-                    //End selection mode
-                    _selection_mode_disable();
-                }, function () {
-                    //Remove fields popup
-                    fieldsPopupSelection.destroy();
-                });
+                /**
+                 * Modal params callback (get from storage <=> background)
+                 * @param allFieldsSelected
+                 */
+                function internalModalParamsClbk(settings) {
+
+                    var checkBoxes = settings['export_all_fields'];
+                    if(!checkBoxes)
+                        checkBoxes = false;
+
+                    //Prevent further calls to params clbk (in that scope)
+                    ACTIONS_MAPPER.map('fields_modal_params_response', null);
+
+                    //Instance fields selection popup
+                    var fieldsPopupSelection = DOM_UTILS.fields_popup(document, fieldsModel, fieldsTemplate, checkBoxes);
+
+                    //Open fields selection
+                    fieldsPopupSelection.open(function (fieldsModel, fieldsTemplate) {
+                        //DEBUG
+                        FormFillerLog.log('Serving template', fieldsTemplate);
+                        //Custom title ?
+                        var fTitle = prompt("Veuillez choisir un titre pour ce formulaire", CONTENT_VARS.pageTitle) || CONTENT_VARS.pageTitle;
+                        //Storing form model into storage
+                        MESSAGE_HANDLER.send('BACKGROUND', ACTIONS_MAPPER.build('save_model', [CONTENT_VARS.pageDomain, fTitle, fieldsModel.uuid, fieldsModel]));
+                        //Download it
+                        IO.download(window.location.hostname + '-' + fieldsModel.uuid, fieldsTemplate, IO.FTYPES.JSON);
+                        //Remove fields popup
+                        fieldsPopupSelection.destroy();
+                        //End selection mode
+                        _selection_mode_disable();
+                    }, function () {
+                        //Remove fields popup
+                        fieldsPopupSelection.destroy();
+                    });
+
+                }
+
+                //Map modal params response
+                ACTIONS_MAPPER.map('import_settings', internalModalParamsClbk);
+
+                //Send query to get modal params
+                MESSAGE_HANDLER.send('BACKGROUND', ACTIONS_MAPPER.build('import_settings'));
+
 
             } else {
                 //End selection mode
