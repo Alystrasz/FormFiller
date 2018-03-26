@@ -14,12 +14,7 @@ MESSAGE_HANDLER.from('POPUP', ACTIONS_MAPPER.process);
 MESSAGE_HANDLER.from('OPTIONS', function(data) {
     switch (data.op) {
         case 'get_user_settings':
-            var options = {
-                export_all_fields: STORAGE_UTILS.config_get('export_all_fields'),
-                export_hidden_fields: STORAGE_UTILS.config_get('export_hidden_fields'),
-                language: STORAGE_UTILS.config_get('language')
-            };
-            MESSAGE_HANDLER.send('OPTIONS', options, false);
+            MESSAGE_HANDLER.send('OPTIONS', _get_user_settings(), false);
             break;
 
         case 'save_user_settings':
@@ -34,6 +29,10 @@ MESSAGE_HANDLER.from('OPTIONS', function(data) {
 
     }
 })
+
+MESSAGE_HANDLER.from('DOMU', function(e) {
+    MESSAGE_HANDLER.send('DOMU', _get_user_settings(), true);
+});
 
 //From : CONTENT_SCRIPT
 MESSAGE_HANDLER.from('CONTENT_SCRIPT', ACTIONS_MAPPER.process);
@@ -68,6 +67,18 @@ function _get_models() {
  */
 function _save_model(domain, modelTitle, uuid, model) {
     STORAGE_UTILS.model_save(domain, modelTitle, uuid, model);
+}
+
+/**
+ * ACTION : returns user settings
+ * @private
+ */
+function _get_user_settings() {
+    return {
+        export_all_fields: STORAGE_UTILS.config_get('export_all_fields'),
+        export_hidden_fields: STORAGE_UTILS.config_get('export_hidden_fields'),
+        language: STORAGE_UTILS.config_get('language')
+    };
 }
 
 /**

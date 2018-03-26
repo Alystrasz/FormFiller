@@ -1,5 +1,15 @@
 var DOM_UTILS = (function () {
 
+    var MESSAGE_HANDLER = BROWSER_UTILS.MESSAGE.register('DOMU');
+
+    // TODO show the popup when receiving the settings, instead of using a callback
+    MESSAGE_HANDLER.from('BACKGROUND', function(op){
+        var checkBoxes = op['export_all_fields'];
+        if(!checkBoxes)
+            checkBoxes = false;
+        console.log('Export all inputs: ' + checkBoxes);
+    });
+
     var DOM_VARS = {
         scrollInstance: null
     };
@@ -918,8 +928,7 @@ var DOM_UTILS = (function () {
         fPopup.innerHTML = '<h4 style="margin-top: 0">Veuillez choisir les champs à exporter</h4>';
 
         //Get user preference
-        //TODO
-
+        MESSAGE_HANDLER.send('BACKGROUND', 'ping', false);
 
         //For each field
         for (var name in fieldsModel.fields) {
@@ -1002,7 +1011,6 @@ var DOM_UTILS = (function () {
                 }
             }
         }
-
 
     }
 
