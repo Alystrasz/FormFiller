@@ -37,10 +37,31 @@ body {
     vertical-align: middle;
 }
 
-.fHeader .fHeaderBtns > a > img {
+.fHeader .fHeaderBtns > a > span {
+
+    display: block;
     width: 32px;
     height: 32px;
     object-fit: cover;
+
+    background-repeat: no-repeat;
+    background-size: cover;
+}
+
+#open_options {
+    background-image: url('/src/ui/icons/i-config.svg');
+}
+
+#open_options:hover {
+    background-image: url('/src/ui/icons/i-config-hover.png');
+}
+
+#open_info {
+    background-image: url('/src/ui/icons/i-about.svg');
+}
+
+#open_info:hover {
+    background-image: url('/src/ui/icons/i-about-hover.png');
 }
 
 #version {

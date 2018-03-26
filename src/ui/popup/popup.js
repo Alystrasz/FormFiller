@@ -32,6 +32,13 @@ document.addEventListener('DOMContentLoaded', function () {
         browser.runtime.openOptionsPage();
     });
 
+    //Get info message
+    document.getElementById('open_info').addEventListener('click', function() {
+        alert('Developed by Jules Spicht & Rémy Raes, both master\'s students at '
+            + 'the University of Lille 1.\nUnder the supervision of Samuel Hym.');
+    });
+
+
     //Get saved models
     MESSAGE_HANDLER.send('BACKGROUND', ACTIONS_MAPPER.build('get_models'));
 
