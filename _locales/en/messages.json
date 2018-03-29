@@ -1,0 +1,11 @@
+{
+	"extensionDescription": {
+		"message": "Fill forms with given template",
+		"description": "Description de l'extension"
+	},
+
+	"popupSelectForms": {
+		"message": "Select forms",
+		"description": "Popup button text"
+	}
+}

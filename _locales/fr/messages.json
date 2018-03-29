@@ -1,0 +1,11 @@
+{
+	"extensionDescription": {
+		"message": "Permet d'exporter des formulaires, de rédiger leur contenu hors-ligne, puis de les importer automatiquement.",
+		"description": "Description de l'extension"
+	},
+
+	"popupSelectForms": {
+		"message": "Sélectionner les formulaires",
+		"description": "Texte du bouton de la popup permettant de lancer le mode sélection"
+	}
+}
