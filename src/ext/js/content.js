@@ -53,7 +53,7 @@ function _selection_mode_enable() {
 
     //Check found forms
     if (formsLen === 0) {
-        alert("Aucun formulaire n'a été détecté sur la page !");
+        alert(browser.i18n.getMessage('noFormsFound'));
         return false;
     }
 
@@ -69,18 +69,22 @@ function _selection_mode_enable() {
 
         //Init context menu items
         var contextMenuItems = [],
-            contextMenuFormsItems = {};
-        //Cancel
-        contextMenuItems.push({
-            Annuler: _selection_mode_disable
-        });
+            contextMenuFormsItems = {},
+			cancelAction = {},
+			cancelBtn = browser.i18n.getMessage('cancelBtn');
+
+		//Cancel
+		cancelAction[cancelBtn] = _selection_mode_disable;
+		contextMenuItems.push(cancelAction);
+
+		var formText = browser.i18n.getMessage('form');
         //Forms
         for (var f = 0; f < formsLen; ++f) {
             //Closure mutation
             (function () {
                 //Display forms in popup
                 var form = forms[f].form;
-                contextMenuFormsItems['Formulaire ' + (f + 1)] = function () {
+                contextMenuFormsItems[formText + ' ' + (f + 1)] = function () {
                     DOM_UTILS.scroll_to(form.getBoundingClientRect(), 250);
                 }
             }());
@@ -135,7 +139,7 @@ function _selection_mode_enable() {
                         //DEBUG
                         FormFillerLog.log('Serving template', fieldsTemplate);
                         //Custom title ?
-                        var fTitle = prompt("Veuillez choisir un titre pour ce formulaire", CONTENT_VARS.pageTitle) || CONTENT_VARS.pageTitle;
+                        var fTitle = prompt(browser.i18n.getMessage('formSelectionPopupChooseTitle'), CONTENT_VARS.pageTitle) || CONTENT_VARS.pageTitle;
                         //Storing form model into storage
                         MESSAGE_HANDLER.send('BACKGROUND', ACTIONS_MAPPER.build('save_model', [CONTENT_VARS.pageDomain, fTitle, fieldsModel.uuid, fieldsModel]));
                         //Download it
@@ -243,6 +247,6 @@ function _form_fill_load(associatedFormModel, userTemplate) {
             }
         }
     } else {
-        alert('Impossible de retrouver le formulaire associé !');
+        alert(browser.i18n.getMessage('noAssociatedForm'));
     }
 }

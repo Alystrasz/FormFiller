@@ -916,8 +916,8 @@ var DOM_UTILS = (function () {
         fOverlay.className = 'ff-popup-overlay';
         fOverlay.id = 'ff-fields-popup-container';
         fPopup.className = 'ff-popup';
-        fPopup.innerHTML = '<h4 style="margin-top: 0">Veuillez choisir les champs à exporter</h4>';
-        
+        fPopup.innerHTML = '<h4 style="margin-top: 0">' + browser.i18n.getMessage('formSelectionPopupTitle') + '</h4>';
+
         //For each field
         for (var name in fieldsModel.fields) {
             //Display field as checkbox
@@ -950,8 +950,8 @@ var DOM_UTILS = (function () {
             cancelClbk = function () {
             };
         buttons.className = 'buttons';
-        exportButton.innerHTML = 'Exporter';
-        cancelButton.innerHTML = 'Annuler';
+        exportButton.innerHTML = browser.i18n.getMessage('formSelectionPopupExportBtn');
+        cancelButton.innerHTML = browser.i18n.getMessage('cancelBtn');
         exportButton.className = 'button';
         cancelButton.className = 'button';
         buttons.appendChild(exportButton);

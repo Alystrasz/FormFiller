@@ -5,6 +5,16 @@
 	},
 
 
+	"popupRegisteredForms": {
+		"message": "Formulaires enregistrés",
+		"description": "Label d'information sur les formulaires enregistrés"
+	},
+
+	"popupNoRegisteredForms": {
+		"message": "Aucun formulaire",
+		"description": "Message affiché lorsqu'aucun formulaire n'a été enregistré"
+	},
+
 	"popupSelectForms": {
 		"message": "Sélectionner les formulaires",
 		"description": "Texte du bouton de la popup permettant de lancer le mode sélection"
@@ -13,5 +23,74 @@
 	"popupImportForm": {
 		"message": "Importer un formulaire",
 		"description": "Texte du bouton de la popup permettant d'importer un template de formulaire"
+	},
+
+
+	"formSelectionPopupTitle": {
+		"message": "Veuillez choisir les champs à exporter",
+		"description": "Label d'information sur la fenêtre d'export de formulaire"
+	},
+
+	"formSelectionPopupExportBtn": {
+		"message": "Exporter",
+		"description": "Bouton lançant le téléchargement du formulaire"
+	},
+
+	"formSelectionPopupChooseTitle": {
+		"message": "Veuillez choisir un titre pour ce formulaire",
+		"description": "Tooltip d'info à l'export d'un formulaire"
+	},
+
+
+	"cancelBtn": {
+		"message": "Annuler",
+		"description": "Bouton permettant d'annuler l'action en cours"
+	},
+
+	"form": {
+		"message": "Formulaire",
+		"description": ""
+	},
+
+
+	"noFormsFound": {
+		"message": "Aucun formulaire n'a été détecté sur la page !",
+		"description": "Message affiché si rien n'a été trouvé"
+	},
+
+	"noAssociatedForm": {
+		"message": "Impossible de retrouver le formulaire associé !",
+		"description": "Message affiché quand le form importé n'est associé à aucun objet sur la page"
+	},
+
+
+	"optionsPreferencesText": {
+		"message": "Préférences",
+		"description": ""
+	},
+
+	"optionsExportAllFieldsTooltip": {
+		"message": "Exporter tous les champs par défaut",
+		"description": ""
+	},
+
+	"optionsExportHiddenFields": {
+		"message": "Exporter les champs cachés",
+		"description": ""
+	},
+
+	"optionsLanguageTooltip": {
+		"message": "Langue",
+		"description": ""
+	},
+
+	"optionLanguageFrench": {
+		"message": "Français",
+		"description": ""
+	},
+
+	"optionLanguageEnglish": {
+		"message": "Anglais",
+		"description": ""
 	}
 }

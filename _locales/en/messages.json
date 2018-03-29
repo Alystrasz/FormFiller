@@ -5,6 +5,16 @@
 	},
 
 
+	"popupRegisteredForms": {
+		"message": "Registered forms",
+		"description": "Tooltip label"
+	},
+
+	"popupNoRegisteredForms": {
+		"message": "No form",
+		"description": "Message displayed when no form has been registered"
+	},
+
 	"popupSelectForms": {
 		"message": "Select forms",
 		"description": "Popup button text"
@@ -12,6 +22,75 @@
 
 	"popupImportForm": {
 		"message": "Import form",
-		"description": "Texte du bouton de la popup permettant d'importer un template de formulaire"
+		"description": "Popup button text to import a form into the extension"
+	},
+
+
+	"formSelectionPopupTitle": {
+		"message": "Select the inputs you want to export",
+		"description": "Info tooltip appearing on the form export window"
+	},
+
+	"formSelectionPopupExportBtn": {
+		"message": "Export",
+		"description": "Button text launching a form downloading"
+	},
+
+	"formSelectionPopupChooseTitle": {
+		"message": "Choose a title for this form",
+		"description": "Info tooltip while exporting a form"
+	},
+
+
+	"cancelBtn": {
+		"message": "Cancel",
+		"description": "Button text canceling the current action"
+	},
+
+	"form": {
+		"message": "Form",
+		"description": ""
+	},
+
+
+	"noFormsFound": {
+		"message": "No form has been found on this page!",
+		"description": "Message displayed when nothing has been detected"
+	},
+
+	"noAssociatedForm": {
+		"message": "Impossible to find the associated form!",
+		"description": "Message displayed when the imported form isn't linked to any element on the current page"
+	},
+
+
+	"optionsPreferencesText": {
+		"message": "Preferences",
+		"description": ""
+	},
+
+	"optionsExportAllFieldsTooltip": {
+		"message": "Export all fields by default",
+		"description": ""
+	},
+
+	"optionsExportHiddenFields": {
+		"message": "Export hidden fields",
+		"description": ""
+	},
+
+	"optionsLanguageTooltip": {
+		"message": "Language",
+		"description": ""
+	},
+
+	"optionLanguageFrench": {
+		"message": "French",
+		"description": ""
+	},
+
+	"optionLanguageEnglish": {
+		"message": "English",
+		"description": ""
 	}
 }

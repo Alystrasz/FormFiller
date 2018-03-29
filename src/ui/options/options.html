@@ -2,31 +2,32 @@
 <html>
     <head>
         <meta charset="UTF-8">
-        <title>Form Filler: preferences</title>
+        <title>Form Filler: __MSG_optionsPreferencesText__</title>
         <link rel="stylesheet" type="text/css" href="../../ext/css/buttons.css">
         <link rel="stylesheet" type="text/css" href="options.css">
+		<script type="text/javascript" src="/src/libs/l10n.js"></script>
     </head>
 
     <body>
-        <h1>Form Filler: preferences</h1>
+        <h1>Form Filler: __MSG_optionsPreferencesText__</h1>
         <hr/>
         <ul class="preferences">
             <li class="container">
-                <label class="container">Exporter tous les champs par défaut
+                <label class="container">__MSG_optionsExportAllFieldsTooltip__
                     <input type="checkbox" id="exportAllInputsBox">
                     <span class="checkmark"></span>
                 </label>
             </li>
             <li>
-                <label class="container">Exporter les champs cachés
+                <label class="container">__MSG_optionsExportHiddenFields__
                     <input type="checkbox" id="exportHiddenInputsBox">
                     <span class="checkmark"></span>
                 </label>
             </li>
-            <li class="container">Langue :
+            <li class="container">__MSG_optionsLanguageTooltip__ :
                 <select id="langSelector">
-                    <option value="fr" selected>Français</option>
-                    <option value="en">Anglais</option>
+                    <option value="fr" selected>__MSG_optionLanguageFrench__</option>
+                    <option value="en">__MSG_optionLanguageEnglish__</option>
                 </select>
             </li>
         </ul>
