@@ -4,8 +4,14 @@
 		"description": "Description de l'extension"
 	},
 
+
 	"popupSelectForms": {
 		"message": "Sélectionner les formulaires",
 		"description": "Texte du bouton de la popup permettant de lancer le mode sélection"
+	},
+
+	"popupImportForm": {
+		"message": "Importer un formulaire",
+		"description": "Texte du bouton de la popup permettant d'importer un template de formulaire"
 	}
 }
