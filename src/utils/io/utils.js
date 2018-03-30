@@ -51,6 +51,7 @@ var IO = (function () {
      * @private
      **/
     function _trigger_download_via_browser_API(filename, data, optType) {
+        console.log(filename);
         // Setting up the link & type
         var type = optType || IO.FTYPES.JSON;
         if (Blob !== undefined) {
@@ -60,7 +61,7 @@ var IO = (function () {
             }else if(type === IO.FTYPES.YAML){
                 ext = '.yaml';
             }
-            MESSAGE_HANDLER.send('BACKGROUND', ACTIONS_MAPPER.build('download_form', [data, type, ext]));
+            MESSAGE_HANDLER.send('BACKGROUND', ACTIONS_MAPPER.build('download_form', [data, type, filename+ext]));
 
         } else {
             console.err('Blob not defined');

@@ -38,11 +38,11 @@ MESSAGE_HANDLER.from('CONTENT_SCRIPT', ACTIONS_MAPPER.process);
 //From : IO_UTILS
 MESSAGE_HANDLER.from('IO_UTILS', ACTIONS_MAPPER.process);
 
-function _launch_download(data, type, ext){
+function _launch_download(data, type, filename){
     var blob = new Blob([JSON.stringify(data, null, 2)], {type: type});
     var downloading = browser.downloads.download({
         url: URL.createObjectURL(blob),
-        filename: data['associatedForm'] + ext
+        filename: filename
     });
 }
 
