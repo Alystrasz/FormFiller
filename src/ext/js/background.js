@@ -7,6 +7,7 @@ ACTIONS_MAPPER.map('get_model', _get_model);
 ACTIONS_MAPPER.map('save_model', _save_model);
 ACTIONS_MAPPER.map('form_open_scroll', _form_open_scroll);
 ACTIONS_MAPPER.map('import_settings', _send_settings);
+ACTIONS_MAPPER.map('download_form', _launch_download);
 
 //From : POPUP
 MESSAGE_HANDLER.from('POPUP', ACTIONS_MAPPER.process);
@@ -33,6 +34,17 @@ MESSAGE_HANDLER.from('OPTIONS', function(data) {
 
 //From : CONTENT_SCRIPT
 MESSAGE_HANDLER.from('CONTENT_SCRIPT', ACTIONS_MAPPER.process);
+
+//From : IO_UTILS
+MESSAGE_HANDLER.from('IO_UTILS', ACTIONS_MAPPER.process);
+
+function _launch_download(data, type, ext){
+    var blob = new Blob([JSON.stringify(data, null, 2)], {type: type});
+    var downloading = browser.downloads.download({
+        url: URL.createObjectURL(blob),
+        filename: data['associatedForm'] + ext
+    });
+}
 
 function _send_settings(fieldsModel, fieldsTemplate) {
     this.sendResponse(ACTIONS_MAPPER.build('import_settings',

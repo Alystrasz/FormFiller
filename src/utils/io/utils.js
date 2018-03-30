@@ -1,5 +1,6 @@
 var IO = (function () {
 
+    var MESSAGE_HANDLER = BROWSER_UTILS.MESSAGE.register('IO_UTILS');
 
     var IO_VARS = {
         dialogInstances: 0
@@ -8,10 +9,13 @@ var IO = (function () {
 
     /**
      * Trigger a 'download' with given parameters
+     * From Chrome 65.0.3325.181, download is blocked by popup add blockers,
+     * so use _trigger_download_via_browser_API instead.
      * @param filename
      * @param data
      * @param optType
      * @private
+     * @deprecated
      */
     function _trigger_download(filename, data, optType) {
         // Setting up the link & type
@@ -39,25 +43,29 @@ var IO = (function () {
         document.body.removeChild(link);
     }
 
+    /**
+     * Launches download of a data model.
+     * @param {String} filename
+     * @param {Object} data
+     * @param {String} optType
+     * @private
+     **/
     function _trigger_download_via_browser_API(filename, data, optType) {
         // Setting up the link & type
         var type = optType || IO.FTYPES.JSON;
         if (Blob !== undefined) {
-            var blob = new Blob([JSON.stringify(data, null, 2)], {type: type});
+            var ext = '';
+            if(type === IO.FTYPES.JSON){
+                ext = '.json';
+            }else if(type === IO.FTYPES.YAML){
+                ext = '.yaml';
+            }
+            MESSAGE_HANDLER.send('BACKGROUND', ACTIONS_MAPPER.build('download_form', [data, type, ext]));
+
         } else {
             console.err('Blob not defined');
             return ;
         }
-        var ext = '';
-        if(type === IO.FTYPES.JSON){
-            ext = '.json';
-        }else if(type === IO.FTYPES.YAML){
-            ext = '.yaml';
-        }
-
-        var downloading = browser.downloads.download({
-            url: URL.createObjectURL(blob)
-        })
     }
 
 
@@ -113,7 +121,7 @@ var IO = (function () {
     }
 
     return {
-        download: _trigger_download,
+        download: _trigger_download_via_browser_API,
         fileDialog: _fdiag_instance,
         url: _url,
         FTYPES : {
