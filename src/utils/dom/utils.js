@@ -728,11 +728,10 @@ var DOM_UTILS = (function () {
                     //Select event
                     if (lastHovered && !markMode) {
                         onSelected(lastHovered);
-                    }else{
+                    }else if(lastHovered){
                         if(lastHovered.classList.contains('ff-mark-toggle'))
                             lastHovered.classList.remove('ff-mark-toggle');
                         else lastHovered.classList.add('ff-mark-toggle');
-                        console.log('mark')
                     }
                 }
             }
