@@ -15,12 +15,20 @@ document.addEventListener('DOMContentLoaded', function () {
 
     //Send message to content script => exit selection mode
     MESSAGE_HANDLER.send('CONTENT_SCRIPT', ACTIONS_MAPPER.build('selection_mode_disable'), true);
+    MESSAGE_HANDLER.send('CONTENT_SCRIPT', ACTIONS_MAPPER.build('selection_mode_disable', [true]), true);
 
-    //Interactive selection
-    document.getElementById('select_start').addEventListener('click', function () {
+    //Interactive selection (formsFields)
+    document.getElementById('select_forms_start').addEventListener('click', function () {
         //Send message to content script => entering selection mode
         MESSAGE_HANDLER.send('CONTENT_SCRIPT', ACTIONS_MAPPER.build('selection_mode_enable'), true);
     });
+
+    //Interactive selection (fields)
+    document.getElementById('select_fields_start').addEventListener('click', function () {
+        //Send message to content script => entering selection mode
+        MESSAGE_HANDLER.send('CONTENT_SCRIPT', ACTIONS_MAPPER.build('selection_mode_enable', [true]), true);
+    });
+
 
     //Import file
     document.getElementById('file_import').addEventListener('click', function () {
@@ -71,14 +79,14 @@ document.addEventListener('DOMContentLoaded', function () {
                 count.className = 'count';
                 models.className = 'fmodels';
                 name.innerText = k;
-                //For each forms in domain
+                //For each formsFields in domain
                 var cnt = 0, forms = savedModels[k];
                 for (var c in forms) {
                     //Property check
                     if (forms.hasOwnProperty(c)) {
                         //Forms count
                         cnt++;
-                        //Display forms
+                        //Display formsFields
                         var
                             fModel = document.createElement('div'),
                             fTitle = document.createElement('div'),

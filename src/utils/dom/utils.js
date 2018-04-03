@@ -1,7 +1,10 @@
 var DOM_UTILS = (function () {
 
     var DOM_VARS = {
-        scrollInstance: null
+        scrollInstance: null,
+        inputsQuery: "input:not([type=submit]):not([type=button])" +
+        ":not([type=file]):not([type=hidden]):not([type=image]):not([type=reset]):not([type=search])" +
+        ",select, textarea"
     };
 
     /**
@@ -218,9 +221,7 @@ var DOM_UTILS = (function () {
      */
     function _fields(node) {
         //Get inputs & selects (as array)
-        var inputs = Array.prototype.slice.call(node.querySelectorAll("input:not([type=submit]):not([type=button])" +
-            ":not([type=file]):not([type=hidden]):not([type=image]):not([type=reset]):not([type=search])" +
-            ",select, textarea")),
+        var inputs = Array.prototype.slice.call(node.querySelectorAll(DOM_VARS.inputsQuery)),
             finputs = [],
             //Save input names
             inputNames = [],
@@ -373,30 +374,43 @@ var DOM_UTILS = (function () {
     }
 
     /**
-     * Get forms & mark if wanted
+     * Get formsFields & mark if wanted
      * @param mark
+     * @param onlyFields
      * @param parentNodeOpt
      * @returns {Array}
      * @private
      */
-    function _forms(mark, parentNodeOpt) {
-        var forms = (parentNodeOpt || document).querySelectorAll('form'),
+    function _formsFields(mark, onlyFields, parentNodeOpt) {
+
+        var formsFields = (parentNodeOpt || document).querySelectorAll(!onlyFields ? 'form' : DOM_VARS.inputsQuery),
             fForms = [];
-        for (var f = 0, flen = forms.length; f < flen; ++f) {
+
+        for (var f = 0, flen = formsFields.length; f < flen; ++f) {
             //Get current form
-            var cForm = forms[f],
+            var cFormField = formsFields[f];
+            if (!onlyFields) {
                 //Get form fields
-                fFields = DOM_UTILS.fields(cForm);
-            //Check eligibility
-            if (fFields.length > 0) {
-                //Apply form class mark
-                if (mark) cForm.classList.add('ff-mark');
-                else if (mark === false) cForm.classList.remove('ff-mark');
-                //Add form to result
+               var fFields = DOM_UTILS.fields(cFormField);
+                //Check eligibility
+                if (fFields.length > 0) {
+                    //Apply class mark
+                    if (mark) cFormField.classList.add('ff-mark');
+                    else if (mark === false) cFormField.classList.remove('ff-mark');
+                    //Add form to result
+                    fForms.push({
+                        form: cFormField,
+                        fields: fFields
+                    });
+                }
+            }else{
+                //Apply class mark
+                if (mark) cFormField.classList.add('ff-mark');
+                else if (mark === false) cFormField.classList.remove('ff-mark');
                 fForms.push({
-                    form: cForm,
-                    fields: fFields
-                });
+                    form: null,
+                    fields: [cFormField]
+                })
             }
         }
         return fForms;
@@ -516,8 +530,8 @@ var DOM_UTILS = (function () {
             //Get scroll position
             scrollPosition = _scroll_position(),
             // Calculate how far to scroll
-            stopY = Math.max(0, ((bounds.top + scrollPosition.top) - (window.innerHeight) / 2) + bounds.height),
-            stopX = Math.max(0, ((bounds.left + scrollPosition.left) - (window.innerWidth + bounds.width) / 2)),
+            stopY = Math.max(0, bounds.top + scrollPosition.top - bounds.height / 2),
+            stopX = Math.max(0, bounds.left + scrollPosition.left - bounds.width / 2),
             // Cache starting position
             startY = scrollPosition.top,
             startX = scrollPosition.left,
@@ -526,6 +540,7 @@ var DOM_UTILS = (function () {
             timeStart,
             timeElapsed,
             nextX, nextY;
+
 
         //Catch user mouse wheel to abort scroll
         window.addEventListener('mousewheel', _dom_scroll_abort, true);
@@ -570,10 +585,11 @@ var DOM_UTILS = (function () {
      * @param onSelected
      * @param filterFunc
      * @param contextMenuItems
+     * @param markMode
      * @returns {boolean}
      * @private
      */
-    function _selection_mode_enable(targetDocument, onHover, onSelected, filterFunc, contextMenuItems) {
+    function _selection_mode_enable(targetDocument, onHover, onSelected, filterFunc, contextMenuItems, markMode) {
 
         //Check if frame already exists
         if (targetDocument.getElementById('ff-selection-mode-frame'))
@@ -710,8 +726,13 @@ var DOM_UTILS = (function () {
                     //Undo context item
                     if (contextMenuItemsLen > 0) _contextMenu(false);
                     //Select event
-                    if (lastHovered) {
+                    if (lastHovered && !markMode) {
                         onSelected(lastHovered);
+                    }else{
+                        if(lastHovered.classList.contains('ff-mark-toggle'))
+                            lastHovered.classList.remove('ff-mark-toggle');
+                        else lastHovered.classList.add('ff-mark-toggle');
+                        console.log('mark')
                     }
                 }
             }
@@ -928,7 +949,7 @@ var DOM_UTILS = (function () {
 
             checkbox.value = name;
             checkbox.type = 'checkbox';
-            if(checkAll)
+            if (checkAll)
                 checkbox.setAttribute('checked', '');
 
             label.innerText = name;
@@ -1010,7 +1031,7 @@ var DOM_UTILS = (function () {
         fields_model: _fields_model,
         fields_template: _fields_template,
         field_value_set: _field_value_set,
-        forms: _forms,
+        formsFields: _formsFields,
         selection_mode: _selection_mode_enable,
         selection_mode_end: _selection_mode_disable,
         shadow: _shadow,

@@ -43,16 +43,16 @@ function _action_template_import() {
  * ACTION : selection mode
  * @private
  */
-function _selection_mode_enable() {
+function _selection_mode_enable(fieldsMode) {
 
     //Check in selection
     if (CONTENT_VARS.shadowRoot) return false;
 
-    //Get forms
-    var forms = DOM_UTILS.forms(true), formsLen = forms.length;
+    //Get formsFields
+    var formsFields = DOM_UTILS.formsFields(true, fieldsMode), formsFieldsLen = formsFields.length;
 
-    //Check found forms
-    if (formsLen === 0) {
+    //Check found formsFields
+    if (formsFieldsLen === 0) {
         alert(browser.i18n.getMessage('noFormsFound'));
         return false;
     }
@@ -70,22 +70,25 @@ function _selection_mode_enable() {
         //Init context menu items
         var contextMenuItems = [],
             contextMenuFormsItems = {},
-			cancelAction = {},
-			cancelBtn = browser.i18n.getMessage('cancelBtn');
+            cancelAction = {},
+            cancelBtn = browser.i18n.getMessage('cancelBtn');
 
-		//Cancel
-		cancelAction[cancelBtn] = _selection_mode_disable;
-		contextMenuItems.push(cancelAction);
+        //Cancel
+        cancelAction[cancelBtn] = function(){
+            _selection_mode_disable(fieldsMode);
+        };
+        contextMenuItems.push(cancelAction);
 
-		var formText = browser.i18n.getMessage('form');
+        var formText = fieldsMode ? 'Champs' : browser.i18n.getMessage('form');
         //Forms
-        for (var f = 0; f < formsLen; ++f) {
+        for (var f = 0; f < formsFieldsLen; ++f) {
             //Closure mutation
             (function () {
-                //Display forms in popup
-                var form = forms[f].form;
+                //Get subject form/field
+                var subjectFormField = !fieldsMode ? formsFields[f].form : formsFields[f].fields[0];
+                //Display formsFields in popup
                 contextMenuFormsItems[formText + ' ' + (f + 1)] = function () {
-                    DOM_UTILS.scroll_to(form.getBoundingClientRect(), 250);
+                    DOM_UTILS.scroll_to(subjectFormField.getBoundingClientRect(), 250);
                 }
             }());
         }
@@ -104,9 +107,9 @@ function _selection_mode_enable() {
 
             //Retrieve associated form fields
             var associatedFieldsModel;
-            for (var f = 0; f < formsLen && !associatedFieldsModel; ++f) {
+            for (var f = 0; f < formsFieldsLen && !associatedFieldsModel; ++f) {
                 //Current form
-                var cForm = forms[f];
+                var cForm = formsFields[f];
                 //Check form & get it's fields
                 if (cForm.form === element) associatedFieldsModel = cForm.fields;
             }
@@ -171,13 +174,15 @@ function _selection_mode_enable() {
 
         }, function (element) {
             //Check if element is in form or if it's the form itself
-            for (var f = 0; f < formsLen; ++f) {
-                var cForm = forms[f];
-                if ((cForm.form === element)
-                    || cForm.form.contains(element)) return cForm.form;
+            for (var f = 0; f < formsFieldsLen; ++f) {
+                var cForm = formsFields[f];
+                if (cForm.fields.length > 0 && cForm.fields[0] === element)
+                    return cForm.fields[0];
+                else if ((cForm.form && (cForm.form === element))
+                    || (cForm.form && cForm.form.contains(element))) return cForm.form;
             }
             return null;
-        }, contextMenuItems);
+        }, contextMenuItems, fieldsMode);
 
     });
 }
@@ -186,7 +191,7 @@ function _selection_mode_enable() {
  * Undo selection mode
  * @private
  */
-function _selection_mode_disable() {
+function _selection_mode_disable(fieldsMode) {
     //Disable selection mode
     if (CONTENT_VARS.shadowRoot) {
         //Undo selection mode
@@ -194,8 +199,8 @@ function _selection_mode_disable() {
         //Remove shadow
         CONTENT_VARS.shadowRoot.destroy();
         CONTENT_VARS.shadowRoot = null;
-        //Un-mark forms
-        DOM_UTILS.forms(false);
+        //Un-mark formsFields
+        DOM_UTILS.formsFields(false, fieldsMode);
     }
 }
 
