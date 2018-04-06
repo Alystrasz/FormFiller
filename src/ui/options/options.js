@@ -1,6 +1,5 @@
 var exportAllInputsBox = document.getElementById('exportAllInputsBox');
 var exportHiddenInputsBox = document.getElementById('exportHiddenInputsBox');
-var langSelector = document.getElementById('langSelector');
 
 
 document.addEventListener('DOMContentLoaded', function() {
@@ -16,12 +15,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
         // 'Export hidden inputs' option
         exportHiddenInputsBox.checked = (op['export_hidden_fields']) ? true : false;
-
-        // Language selection
-        if(op['language'])
-            langSelector.selectedIndex = op['language'];
-        else
-            langSelector.selectedIndex = 0;
     });
 
 
@@ -33,16 +26,11 @@ document.addEventListener('DOMContentLoaded', function() {
         _save_user_settings()
     });
 
-    langSelector.addEventListener('change', function() {
-        _save_user_settings()
-    });
-
 
     function _save_user_settings() {
         var options = {
             export_all_fields: exportAllInputsBox.checked,
-            export_hidden_fields: exportHiddenInputsBox.checked,
-            language: langSelector.selectedIndex
+            export_hidden_fields: exportHiddenInputsBox.checked
         };
         MESSAGE_HANDLER.send('BACKGROUND', {op: 'save_user_settings', settings: options }, false);
     }

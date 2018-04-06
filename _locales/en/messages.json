@@ -77,20 +77,5 @@
 	"optionsExportHiddenFields": {
 		"message": "Export hidden fields",
 		"description": ""
-	},
-
-	"optionsLanguageTooltip": {
-		"message": "Language",
-		"description": ""
-	},
-
-	"optionLanguageFrench": {
-		"message": "French",
-		"description": ""
-	},
-
-	"optionLanguageEnglish": {
-		"message": "English",
-		"description": ""
 	}
 }

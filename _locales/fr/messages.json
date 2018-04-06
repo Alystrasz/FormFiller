@@ -77,20 +77,5 @@
 	"optionsExportHiddenFields": {
 		"message": "Exporter les champs cachés",
 		"description": ""
-	},
-
-	"optionsLanguageTooltip": {
-		"message": "Langue",
-		"description": ""
-	},
-
-	"optionLanguageFrench": {
-		"message": "Français",
-		"description": ""
-	},
-
-	"optionLanguageEnglish": {
-		"message": "Anglais",
-		"description": ""
 	}
 }

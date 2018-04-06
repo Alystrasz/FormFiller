@@ -23,7 +23,6 @@ MESSAGE_HANDLER.from('OPTIONS', function(data) {
             console.log(data);
             STORAGE_UTILS.config_set('export_all_fields', data.settings['export_all_fields']);
             STORAGE_UTILS.config_set('export_hidden_fields', data.settings['export_hidden_fields']);
-            STORAGE_UTILS.config_set('language', data.settings['language']);
             break;
 
         default:
