@@ -74,7 +74,7 @@ function _selection_mode_enable(fieldsMode) {
             cancelBtn = browser.i18n.getMessage('cancelBtn');
 
         //Cancel
-        cancelAction[cancelBtn] = function(){
+        cancelAction[cancelBtn] = function () {
             _selection_mode_disable(fieldsMode);
         };
         contextMenuItems.push(cancelAction);
@@ -176,13 +176,37 @@ function _selection_mode_enable(fieldsMode) {
             //Check if element is in form or if it's the form itself
             for (var f = 0; f < formsFieldsLen; ++f) {
                 var cForm = formsFields[f];
-                if (cForm.fields.length > 0 && cForm.fields[0] === element)
-                    return cForm.fields[0];
+                if (cForm.fields.length > 0 && cForm.fields[0][0].element === element)
+                    return cForm.fields[0][0].element;
                 else if ((cForm.form && (cForm.form === element))
                     || (cForm.form && cForm.form.contains(element))) return cForm.form;
             }
             return null;
-        }, contextMenuItems, fieldsMode);
+        }, contextMenuItems, fieldsMode, function (markedElements) {
+
+            //Virtual conversion
+            var virtualFieldsModel = [];
+
+            for (var i = 0; i < formsFields.length; ++i) {
+                var cField = formsFields[i].fields[0][0];
+                if (markedElements.indexOf(cField.element) !== -1) virtualFieldsModel.push(cField)
+            }
+
+            //Get model & user template
+            var fieldsModel = DOM_UTILS.fields_model(null, virtualFieldsModel),
+                fieldsTemplate = DOM_UTILS.fields_template(fieldsModel);
+
+            //Custom title ?
+            var fTitle = prompt(browser.i18n.getMessage('formSelectionPopupChooseTitle'), CONTENT_VARS.pageTitle) || CONTENT_VARS.pageTitle;
+
+            //Storing form model into storage
+            MESSAGE_HANDLER.send('BACKGROUND', ACTIONS_MAPPER.build('save_model', [CONTENT_VARS.pageDomain, fTitle, fieldsModel.uuid, fieldsModel]));
+            //Download it
+            IO.download(window.location.hostname + '-' + fieldsModel.uuid, fieldsTemplate, IO.FTYPES.JSON);
+            //End selection mode
+            _selection_mode_disable(true);
+
+        });
 
     });
 }
@@ -199,9 +223,9 @@ function _selection_mode_disable(fieldsMode) {
         //Remove shadow
         CONTENT_VARS.shadowRoot.destroy();
         CONTENT_VARS.shadowRoot = null;
-        //Un-mark formsFields
-        DOM_UTILS.formsFields(false, fieldsMode);
     }
+    //Un-mark formsFields
+    DOM_UTILS.formsFields(false, fieldsMode);
 }
 
 /**

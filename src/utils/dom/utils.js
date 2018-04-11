@@ -35,12 +35,14 @@ var DOM_UTILS = (function () {
     /**
      * Get XPath of given element
      * @param element
-     * @returns {string}
+     * @returns {*}
      * @private
      */
     function _xpath(element) {
-        if (element.id !== '')
-            return 'id("' + element.id + '")';
+        if (!element) return null;
+        //CANCELED -> Some frameworks like 'react' generate UNIQUE ids
+        /*if (element.id !== '')
+            return 'id("' + element.id + '")';*/
         if (element === document.body)
             return '//' + element.tagName;
         var ix = 0,
@@ -216,12 +218,13 @@ var DOM_UTILS = (function () {
     /**
      * Return found fields of a given node
      * @param node
+     * @param standalone
      * @returns {Array}
      * @private
      */
-    function _fields(node) {
+    function _fields(node, standalone) {
         //Get inputs & selects (as array)
-        var inputs = Array.prototype.slice.call(node.querySelectorAll(DOM_VARS.inputsQuery)),
+        var inputs = standalone ? [node] : Array.prototype.slice.call(node.querySelectorAll(DOM_VARS.inputsQuery)),
             finputs = [],
             //Save input names
             inputNames = [],
@@ -391,7 +394,7 @@ var DOM_UTILS = (function () {
             var cFormField = formsFields[f];
             if (!onlyFields) {
                 //Get form fields
-               var fFields = DOM_UTILS.fields(cFormField);
+                var fFields = DOM_UTILS.fields(cFormField, false);
                 //Check eligibility
                 if (fFields.length > 0) {
                     //Apply class mark
@@ -403,13 +406,16 @@ var DOM_UTILS = (function () {
                         fields: fFields
                     });
                 }
-            }else{
+            } else {
                 //Apply class mark
                 if (mark) cFormField.classList.add('ff-mark');
-                else if (mark === false) cFormField.classList.remove('ff-mark');
+                else if (mark === false) {
+                    cFormField.classList.remove('ff-mark');
+                    cFormField.classList.remove('ff-mark-toggle');
+                }
                 fForms.push({
                     form: null,
-                    fields: [cFormField]
+                    fields: [DOM_UTILS.fields(cFormField, true)]
                 })
             }
         }
@@ -586,10 +592,11 @@ var DOM_UTILS = (function () {
      * @param filterFunc
      * @param contextMenuItems
      * @param markMode
+     * @param onMarkExport
      * @returns {boolean}
      * @private
      */
-    function _selection_mode_enable(targetDocument, onHover, onSelected, filterFunc, contextMenuItems, markMode) {
+    function _selection_mode_enable(targetDocument, onHover, onSelected, filterFunc, contextMenuItems, markMode, onMarkExport) {
 
         //Check if frame already exists
         if (targetDocument.getElementById('ff-selection-mode-frame'))
@@ -701,7 +708,8 @@ var DOM_UTILS = (function () {
 
             /** HANDLE SELECTION **/
 
-            var lastHovered = null;
+            var lastHovered = null,
+                markedElements = [];
 
             function _handleMove(e) {
                 //depth=2, ignore overlay
@@ -728,10 +736,15 @@ var DOM_UTILS = (function () {
                     //Select event
                     if (lastHovered && !markMode) {
                         onSelected(lastHovered);
-                    }else if(lastHovered){
-                        if(lastHovered.classList.contains('ff-mark-toggle'))
+                    } else if (lastHovered) {
+                        if (lastHovered.classList.contains('ff-mark-toggle')) {
                             lastHovered.classList.remove('ff-mark-toggle');
-                        else lastHovered.classList.add('ff-mark-toggle');
+                            markedElements.splice(markedElements.indexOf(lastHovered), 1);
+                        }
+                        else {
+                            markedElements.push(lastHovered);
+                            lastHovered.classList.add('ff-mark-toggle');
+                        }
                     }
                 }
             }
@@ -739,7 +752,16 @@ var DOM_UTILS = (function () {
 
             /** CONTEXT MENU **/
 
-                //Check context menu items
+            //Fields mode
+            if (markMode) {
+                contextMenuItems.splice(0, 0, {
+                    'Exporter': function () {
+                        onMarkExport(markedElements);
+                    }
+                });
+            }
+
+            //Check context menu items
             var contextMenuItemsLen = !contextMenuItems ? 0 : contextMenuItems.length;
 
             if (contextMenuItemsLen > 0) {
