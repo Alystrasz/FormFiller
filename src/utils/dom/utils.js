@@ -582,6 +582,7 @@ var DOM_UTILS = (function () {
 
         // Start the loop
         if (distanceX !== 0 || distanceY !== 0) DOM_VARS.scrollInstance = requestAnimationFrame(loop);
+        else if (onEnd) onEnd();
     }
 
     /**

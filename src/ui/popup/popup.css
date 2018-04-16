@@ -79,7 +79,6 @@ body {
     color: #707070;
 }
 
-
 .models .domain {
     display: block;
     margin: 5px 0;
@@ -135,18 +134,18 @@ body {
     margin-top: 5px;
 }
 
-
 .models .domain .fmodels .fmodel {
     overflow: hidden;
     margin-top: 5px;
 }
 
-.models .domain .fmodels .fmodel .title{
+.models .domain .fmodels .fmodel .title {
     display: block;
     cursor: pointer;
 }
-.models .domain .fmodels .fmodel .title:before{
-    display:inline-block;
+
+.models .domain .fmodels .fmodel .title:before {
+    display: inline-block;
     vertical-align: middle;
     content: '-';
     margin-right: 4px;

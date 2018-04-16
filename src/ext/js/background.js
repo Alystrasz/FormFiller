@@ -13,7 +13,7 @@ ACTIONS_MAPPER.map('download_form', _launch_download);
 MESSAGE_HANDLER.from('POPUP', ACTIONS_MAPPER.process);
 
 //From : OPTIONS PAGE
-MESSAGE_HANDLER.from('OPTIONS', function(data) {
+MESSAGE_HANDLER.from('OPTIONS', function (data) {
     switch (data.op) {
         case 'get_user_settings':
             MESSAGE_HANDLER.send('OPTIONS', _get_user_settings(), false);
@@ -29,7 +29,7 @@ MESSAGE_HANDLER.from('OPTIONS', function(data) {
             break;
 
     }
-})
+});
 
 //From : CONTENT_SCRIPT
 MESSAGE_HANDLER.from('CONTENT_SCRIPT', ACTIONS_MAPPER.process);
@@ -37,18 +37,19 @@ MESSAGE_HANDLER.from('CONTENT_SCRIPT', ACTIONS_MAPPER.process);
 //From : IO_UTILS
 MESSAGE_HANDLER.from('IO_UTILS', ACTIONS_MAPPER.process);
 
-function _launch_download(data, type, filename){
+function _launch_download(data, type, filename) {
     var blob = new Blob([JSON.stringify(data, null, 2)], {type: type});
-    var downloading = browser.downloads.download({
+    browser.downloads.download({
         url: URL.createObjectURL(blob),
         filename: filename
     });
 }
 
-function _send_settings(fieldsModel, fieldsTemplate) {
+function _send_settings() {
     this.sendResponse(ACTIONS_MAPPER.build('import_settings',
         [_get_user_settings()]));
 }
+
 /**
  * ACTION : get model with given args
  * @param pageDomain
@@ -106,23 +107,28 @@ function _form_open_scroll(handledForm) {
         //Get tab id
         var tabId = tab.id;
 
-        //Injecting form XPath (caring about formatting)
-        browser.tabs.executeScript(tabId, {
-            code: "window.ffHFXPath='" + handledForm.model.xpath.replace(/'/g, "\\'") + "'",
-            runAt: "document_start"
-        });
+        //Check form
+        if (handledForm.model.xpath) {
 
-        //Injecting dom utils script
-        browser.tabs.executeScript(tabId, {
-            file: "/src/utils/dom/utils.js",
-            runAt: "document_end"
-        }).then(function () {
-            //Injecting shared script to interact with current form
+            //Injecting form XPath (caring about formatting)
             browser.tabs.executeScript(tabId, {
-                file: '/src/ext/js/shared/form_focus.js',
-                runAt: "document_end"
+                code: "window.ffHFXPath='" + handledForm.model.xpath.replace(/'/g, "\\'") + "'",
+                runAt: "document_start"
             });
-        });
+
+            //Injecting dom utils script
+            browser.tabs.executeScript(tabId, {
+                file: "/src/utils/dom/utils.js",
+                runAt: "document_end"
+            }).then(function () {
+                //Injecting shared script to interact with current form
+                browser.tabs.executeScript(tabId, {
+                    file: '/src/ext/js/shared/form_focus.js',
+                    runAt: "document_end"
+                });
+            });
+
+        }
     });
 }
 

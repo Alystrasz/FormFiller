@@ -5,7 +5,7 @@ var obj = {
 
     // this is a comment
     b: 4,
-    c: function() {
+    c: function () {
         // this is a comment
         console.log('cc');
     }

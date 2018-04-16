@@ -113,8 +113,8 @@ var STORAGE_UTILS = (function () {
      * @returns {*|{}}
      * @private
      */
-    function _models(){
-        return _get(STORAGE_MODELS_DOMAIN) || {};
+    function _models() {
+        return _get(STORAGE_MODELS_DOMAIN) || {};
     }
 
     /**

@@ -29,9 +29,9 @@ var IO = (function () {
             link.setAttribute('href', 'storage:' + type + ',' + encodeURIComponent(data));
         }
         var ext = '';
-        if(type === IO.FTYPES.JSON){
+        if (type === IO.FTYPES.JSON) {
             ext = '.json';
-        }else if(type === IO.FTYPES.YAML){
+        } else if (type === IO.FTYPES.YAML) {
             ext = '.yaml';
         }
         link.setAttribute('download', filename + ext);
@@ -56,16 +56,16 @@ var IO = (function () {
         var type = optType || IO.FTYPES.JSON;
         if (Blob !== undefined) {
             var ext = '';
-            if(type === IO.FTYPES.JSON){
+            if (type === IO.FTYPES.JSON) {
                 ext = '.json';
-            }else if(type === IO.FTYPES.YAML){
+            } else if (type === IO.FTYPES.YAML) {
                 ext = '.yaml';
             }
-            MESSAGE_HANDLER.send('BACKGROUND', ACTIONS_MAPPER.build('download_form', [data, type, filename+ext]));
+            MESSAGE_HANDLER.send('BACKGROUND', ACTIONS_MAPPER.build('download_form', [data, type, filename + ext]));
 
         } else {
             console.err('Blob not defined');
-            return ;
+            return;
         }
     }
 
@@ -117,7 +117,7 @@ var IO = (function () {
         }
     }
 
-    function _url(file){
+    function _url(file) {
         return browser.extension.getURL(file);
     }
 
@@ -125,7 +125,7 @@ var IO = (function () {
         download: _trigger_download_via_browser_API,
         fileDialog: _fdiag_instance,
         url: _url,
-        FTYPES : {
+        FTYPES: {
             JSON: 'application/json',
             YAML: 'application/x-yaml'
         }

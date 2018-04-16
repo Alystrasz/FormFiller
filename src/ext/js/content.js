@@ -6,8 +6,6 @@ var CONTENT_VARS = {
     shadowRoot: null
 };
 
-var fieldsModel, fieldsTemplate, doc;
-
 //Init message handler
 var MESSAGE_HANDLER = BROWSER_UTILS.MESSAGE.register('CONTENT_SCRIPT');
 
@@ -57,6 +55,15 @@ function _selection_mode_enable(fieldsMode) {
         return false;
     }
 
+    function saveModelAndDownload(fieldsModel, fieldsTemplate) {
+        //Custom title ?
+        var fTitle = prompt(browser.i18n.getMessage('formSelectionPopupChooseTitle'), CONTENT_VARS.pageTitle) || CONTENT_VARS.pageTitle;
+        //Storing form model into storage
+        MESSAGE_HANDLER.send('BACKGROUND', ACTIONS_MAPPER.build('save_model', [CONTENT_VARS.pageDomain, fTitle, fieldsModel.uuid, fieldsModel]));
+        //Download it
+        IO.download(CONTENT_VARS.pageDomain + '-' + fieldsModel.uuid, fieldsTemplate, IO.FTYPES.JSON);
+    }
+
     //Creating shadow root
     //NOTE : each loaded resource must be declared in manifest
     CONTENT_VARS.shadowRoot = DOM_UTILS.shadow([
@@ -85,7 +92,7 @@ function _selection_mode_enable(fieldsMode) {
             //Closure mutation
             (function () {
                 //Get subject form/field
-                var subjectFormField = !fieldsMode ? formsFields[f].form : formsFields[f].fields[0];
+                var subjectFormField = !fieldsMode ? formsFields[f].form : formsFields[f].fields[0][0].element;
                 //Display formsFields in popup
                 contextMenuFormsItems[formText + ' ' + (f + 1)] = function () {
                     DOM_UTILS.scroll_to(subjectFormField.getBoundingClientRect(), 250);
@@ -99,8 +106,6 @@ function _selection_mode_enable(fieldsMode) {
             //DEBUG
             //FormFillerLog.log('Hovered', element);
         }, function (element) {
-
-            doc = document;
 
             //NOTE : element is type of form
             FormFillerLog.log('Selected', element);
@@ -141,12 +146,8 @@ function _selection_mode_enable(fieldsMode) {
                     fieldsPopupSelection.open(function (fieldsModel, fieldsTemplate) {
                         //DEBUG
                         FormFillerLog.log('Serving template', fieldsTemplate);
-                        //Custom title ?
-                        var fTitle = prompt(browser.i18n.getMessage('formSelectionPopupChooseTitle'), CONTENT_VARS.pageTitle) || CONTENT_VARS.pageTitle;
-                        //Storing form model into storage
-                        MESSAGE_HANDLER.send('BACKGROUND', ACTIONS_MAPPER.build('save_model', [CONTENT_VARS.pageDomain, fTitle, fieldsModel.uuid, fieldsModel]));
-                        //Download it
-                        IO.download(window.location.hostname + '-' + fieldsModel.uuid, fieldsTemplate, IO.FTYPES.JSON);
+                        //Save & download
+                        saveModelAndDownload(fieldsModel, fieldsTemplate);
                         //Remove fields popup
                         fieldsPopupSelection.destroy();
                         //End selection mode
@@ -176,7 +177,7 @@ function _selection_mode_enable(fieldsMode) {
             //Check if element is in form or if it's the form itself
             for (var f = 0; f < formsFieldsLen; ++f) {
                 var cForm = formsFields[f];
-                if (cForm.fields.length > 0 && cForm.fields[0][0].element === element)
+                if (cForm.fields.length > 0 && cForm.fields[0][0] && cForm.fields[0][0].element === element)
                     return cForm.fields[0][0].element;
                 else if ((cForm.form && (cForm.form === element))
                     || (cForm.form && cForm.form.contains(element))) return cForm.form;
@@ -196,13 +197,8 @@ function _selection_mode_enable(fieldsMode) {
             var fieldsModel = DOM_UTILS.fields_model(null, virtualFieldsModel),
                 fieldsTemplate = DOM_UTILS.fields_template(fieldsModel);
 
-            //Custom title ?
-            var fTitle = prompt(browser.i18n.getMessage('formSelectionPopupChooseTitle'), CONTENT_VARS.pageTitle) || CONTENT_VARS.pageTitle;
-
-            //Storing form model into storage
-            MESSAGE_HANDLER.send('BACKGROUND', ACTIONS_MAPPER.build('save_model', [CONTENT_VARS.pageDomain, fTitle, fieldsModel.uuid, fieldsModel]));
-            //Download it
-            IO.download(window.location.hostname + '-' + fieldsModel.uuid, fieldsTemplate, IO.FTYPES.JSON);
+            //Save & download
+            saveModelAndDownload(fieldsModel, fieldsTemplate);
             //End selection mode
             _selection_mode_disable(true);
 

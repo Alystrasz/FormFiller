@@ -7,6 +7,7 @@ if (formXPath) {
     delete window.ffHFXPath;
     //Resolving
     var formElement = DOM_UTILS.fromXPath(formXPath);
+
     if (formElement) {
         //Scroll to it
         DOM_UTILS.scroll_to(formElement.getBoundingClientRect(), 250, function () {
@@ -18,7 +19,7 @@ if (formXPath) {
                 var border = getComputedStyle(formElement).getPropertyValue('border'),
                     nBorder = '2px dashed red';
                 //Flicker to notice user
-                var flickerCount = 2,
+                var flickerCount = 4,
                     flickerInterval = 120;
 
                 function _flicker() {

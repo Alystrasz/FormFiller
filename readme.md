@@ -2,7 +2,33 @@
 
 This project aims to fill forms while being offline.
 
-## Installing
+## Packaging
+
+Packaging tools are under `tools` folder
+
+In order to build the extension, just go into `tools` and run the following commands
+
+```
+npm install
+make   
+```
+
+You will find each packages under `tools/out` folder
+
+### For Chrome
+
+```
+make chrome
+```
+
+### For Firefox
+
+```
+make firefox
+```
+
+
+## Installing (Dev)
 
 ### On Chrome
 
