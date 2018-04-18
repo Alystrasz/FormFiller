@@ -92,9 +92,9 @@ function _selection_mode_enable(fieldsMode) {
             //Closure mutation
             (function () {
                 //Get subject form/field
-                var subjectFormField = !fieldsMode ? formsFields[f].form : formsFields[f].fields[0][0].element;
+                var subjectFormField = !fieldsMode ? formsFields[f].form : (formsFields[f].fields[0][0] ? formsFields[f].fields[0][0].element : null);
                 //Display formsFields in popup
-                contextMenuFormsItems[formText + ' ' + (f + 1)] = function () {
+                if (subjectFormField) contextMenuFormsItems[formText + ' ' + (f + 1)] = function () {
                     DOM_UTILS.scroll_to(subjectFormField.getBoundingClientRect(), 250);
                 }
             }());
@@ -190,7 +190,7 @@ function _selection_mode_enable(fieldsMode) {
 
             for (var i = 0; i < formsFields.length; ++i) {
                 var cField = formsFields[i].fields[0][0];
-                if (markedElements.indexOf(cField.element) !== -1) virtualFieldsModel.push(cField)
+                if (cField && markedElements.indexOf(cField.element) !== -1) virtualFieldsModel.push(cField)
             }
 
             //Get model & user template
