@@ -20,6 +20,11 @@
 		"description": "Texte du bouton de la popup permettant de lancer le mode sélection"
 	},
 
+	"popupSelectFields": {
+		"message": "Sélectionner les champs",
+		"description": "Texte du bouton de la popup permettant de lancer le mode sélection des champs"
+	},
+
 	"popupImportForm": {
 		"message": "Importer un formulaire",
 		"description": "Texte du bouton de la popup permettant d'importer un template de formulaire"

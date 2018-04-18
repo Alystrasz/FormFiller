@@ -20,6 +20,11 @@
 		"description": "Popup button text"
 	},
 
+	"popupSelectFields": {
+		"message": "Select fields",
+		"description": "Popup button text to select individual fields"
+	},
+
 	"popupImportForm": {
 		"message": "Import form",
 		"description": "Popup button text to import a form into the extension"
