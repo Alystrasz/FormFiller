@@ -52,8 +52,18 @@
 		"description": "Button text canceling the current action"
 	},
 
+	"export": {
+		"message": "Export",
+		"description": "Button text to export the current selection"
+	},
+
 	"form": {
 		"message": "Form",
+		"description": ""
+	},
+
+	"field": {
+		"message": "Field",
 		"description": ""
 	},
 

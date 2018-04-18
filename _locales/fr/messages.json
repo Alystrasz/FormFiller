@@ -52,8 +52,18 @@
 		"description": "Bouton permettant d'annuler l'action en cours"
 	},
 
+	"export": {
+		"message": "Exporter",
+		"description": ""
+	},
+
 	"form": {
 		"message": "Formulaire",
+		"description": ""
+	},
+
+	"field": {
+		"message": "Champ",
 		"description": ""
 	},
 

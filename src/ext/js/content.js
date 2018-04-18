@@ -86,7 +86,7 @@ function _selection_mode_enable(fieldsMode) {
         };
         contextMenuItems.push(cancelAction);
 
-        var formText = fieldsMode ? 'Champs' : browser.i18n.getMessage('form');
+        var formText = fieldsMode ? browser.i18n.getMessage('field') : browser.i18n.getMessage('form');
         //Forms
         for (var f = 0; f < formsFieldsLen; ++f) {
             //Closure mutation
