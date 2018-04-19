@@ -1,6 +1,7 @@
 #!/bin/bash
 
 source "config.sh"
+source "api-keys.sh"
 
 TARGET="ALL"
 while getopts 't:' flag; do
@@ -26,7 +27,7 @@ function build_firefox(){
 	echo
 	echo "**FIREFOX - BUILD**"
 	find "$OUT_DIR" -name *.xpi -type f -delete 
-	$NPX_EXEC web-ext sign -s "$BUILD_DIR/" -a "$OUT_DIR/" --api-key "user:13959944:771" --api-secret "0f52386de725b7614574ab522dd33c067c150bb75ad0183269af0e1b4070654b"
+	$NPX_EXEC web-ext sign -s "$BUILD_DIR/" -a "$OUT_DIR/" --api-key "$JWT" --api-secret "$JWT_SECRET"
 	mv `find $CUR_DIR/$OUT_DIR/*.xpi` "$CUR_DIR/$OUT_DIR/$XPI_OUT"
 }
 

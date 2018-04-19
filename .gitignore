@@ -3,3 +3,4 @@
 tools/out
 tools/build
 tools/node_modules
+tools/api-keys.sh

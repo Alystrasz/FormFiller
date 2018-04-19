@@ -6,5 +6,5 @@ OUT_DIR=out
 BUILD_DIR=build
 NPX_EXEC="node ./node_modules/npx/index.js"
 
-XPI_OUT="FormFiller.xpi"
-CRX_OUT="FormFiller.crx"
+XPI_OUT="FormFiller-Firefox.xpi"
+CRX_OUT="FormFiller-Chrome.crx"
