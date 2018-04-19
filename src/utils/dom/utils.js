@@ -755,11 +755,12 @@ var DOM_UTILS = (function () {
 
             //Fields mode
             if (markMode) {
-                contextMenuItems.splice(0, 0, {
-                    'Exporter': function () {
-                        onMarkExport(markedElements);
-                    }
-                });
+				var exp = browser.i18n.getMessage('export'),
+					obj = {};
+				obj[exp] = function() {
+					onMarkExport(markedElements);
+				};
+				contextMenuItems.splice(0, 0, obj);
             }
 
             //Check context menu items

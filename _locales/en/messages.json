@@ -20,6 +20,11 @@
 		"description": "Popup button text"
 	},
 
+	"popupSelectFields": {
+		"message": "Select fields",
+		"description": "Popup button text to select individual fields"
+	},
+
 	"popupImportForm": {
 		"message": "Import form",
 		"description": "Popup button text to import a form into the extension"
@@ -47,8 +52,18 @@
 		"description": "Button text canceling the current action"
 	},
 
+	"export": {
+		"message": "Export",
+		"description": "Button text to export the current selection"
+	},
+
 	"form": {
 		"message": "Form",
+		"description": ""
+	},
+
+	"field": {
+		"message": "Field",
 		"description": ""
 	},
 
